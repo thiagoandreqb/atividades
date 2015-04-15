@@ -1,0 +1,164 @@
+#include <vcl.h>
+#include <windows.h>
+
+#pragma hdrstop
+#pragma argsused
+
+#include <tchar.h>
+
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+/*
+	int arrayDeInteiroUnidimensional[10];
+	srand(time(NULL));
+	int i;
+
+	for (i = 0; i < 10; i++) {
+		arrayDeInteiroUnidimensional[i] = rand();
+	}
+
+	for(i = 0 ; i <= 9; i++)
+	{
+		cout<<arrayDeInteiroUnidimensional[i]<<" ";
+	}
+
+	cout<<"FIM DO EXEMPLO DE ARRAY DE UMA DIMENSÃO"<<endl<<endl;
+
+	//<TIPO DA MATRIZ> <NOME DA MATRIZ>[<TAMANHO>][<TAMANHO>]
+	int arrayDeInteiroBidimensional[10][10];
+	int contador = 0;
+	for( int i = 0; i<10; i++)
+	{
+		for(int j = 0; j<10; j++)
+		{
+			arrayDeInteiroBidimensional[i][j] = contador;//rand();
+			contador++;
+		}
+	}
+	for( int i = 0; i<10; i++)
+	{
+		for(int j = 0; j<10; j++)
+		{
+			cout<<arrayDeInteiroBidimensional[i][j]<<" ";
+		}
+		cout<<endl;
+	}
+
+*/
+	//Diagonal principal *
+/*
+	int a, b;
+
+	for(a = 0; a<10; a++)
+	{
+		for(b = 0; b<10; b++)
+		{
+			if (a==b)
+			{
+			 cout<<1;
+			}
+			else
+			{
+			 cout<<0;
+			}
+		}
+		cout<<endl;
+	 }
+*/
+	//Parte vertical esquerda *
+	int c, d;
+
+	for (c = 0; c < 10; c++)
+	{
+		for (d = 0; d < 10; d++)
+		{
+			if ((c<10) && (d<5))
+			{
+				cout<<0;
+			}
+			else
+			{
+				cout<<1;
+			}
+		}
+		cout<<endl;
+	}
+	cout<<endl;
+	//Parte vertical direita
+
+	//Parte horizontal superior *
+	int e, f;
+
+	for (e = 0; e < 10; e++)
+	{
+		for (f = 0; f < 10; f++)
+		{
+			if ((e<5) && (f<10))
+			{
+				cout<<0;
+			}
+			else
+			{
+				cout<<1;
+			}
+		}
+		cout<<endl;
+	}
+	cout<<endl;
+	//Parte horizontal inferior
+
+	//Diagonal principal superior pintada *
+	int g, h;
+
+	for (g = 0; g < 10; g++)
+	{
+		for (h = 0; h < 10; h++)
+		{
+			if ((g>h) || (h==g))
+			{
+				cout<<0;
+			}
+			else
+			{
+				cout<<1;
+			}
+		}
+		cout<<endl;
+	}
+
+	//Diagonal principal inferior pintada
+
+	//Diagonal secundaria superior pintada
+
+	//Diagonal secundaria inferior pintada
+
+	return 0;
+							 /*
+	TIPO NOME_ARRAY[TAMANHO]
+	TIPO NOME_ARRAY[TAMANHO][TAMANHO]
+	int arrayDeInteiroUn[10]
+	int arrayDeInteiroBi[10][]
+	TIPO ARRAY???
+
+
+	array[10]
+	0 1 2 3 4 5 6 7 8 9
+	1 1 1 1 1 1 1 1 1 1 <-
+
+	1 1 1 1 1 1 1 1 1 1 <-
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+							   */
+}

@@ -1,0 +1,170 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "Calc.h"
+#include "math.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TCalculadora *Calculadora;
+//---------------------------------------------------------------------------
+__fastcall TCalculadora::TCalculadora(TComponent* Owner)
+	: TForm(Owner)
+{
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button0Click(TObject *Sender)
+{
+	ButtonedEditValor->Text =	ButtonedEditValor->Text + 0;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button1Click(TObject *Sender)
+{
+	ButtonedEditValor->Text = ButtonedEditValor->Text + 1;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button2Click(TObject *Sender)
+{
+	ButtonedEditValor->Text = ButtonedEditValor->Text + 2;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button3Click(TObject *Sender)
+{
+	ButtonedEditValor->Text = ButtonedEditValor->Text + 3;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button4Click(TObject *Sender)
+{
+	ButtonedEditValor->Text = ButtonedEditValor->Text + 4;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button5Click(TObject *Sender)
+{
+	ButtonedEditValor->Text = ButtonedEditValor->Text + 5;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button6Click(TObject *Sender)
+{
+	ButtonedEditValor->Text = ButtonedEditValor->Text + 6;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button7Click(TObject *Sender)
+{
+	ButtonedEditValor->Text = ButtonedEditValor->Text + 7;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button8Click(TObject *Sender)
+{
+	ButtonedEditValor->Text = ButtonedEditValor->Text + 8;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button9Click(TObject *Sender)
+{
+	ButtonedEditValor->Text = ButtonedEditValor->Text + 9;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonVirgulaClick(TObject *Sender)
+{
+	ButtonedEditValor->Text = ButtonedEditValor->Text + ",";
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonLimparTudoClick(TObject *Sender)
+{
+	ButtonedEditValor->Text = "";
+          numero1 = 0;
+          numero2 = 0;
+					total   = 0;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonSomarClick(TObject *Sender)
+{
+							numero1 = ButtonedEditValor->Text.ToDouble();
+							ButtonedEditValor->Text="";
+							operador = '+' ;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonLimparAtualClick(TObject *Sender)
+{
+	ButtonedEditValor->Text = "";
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TCalculadora::ButtonSubtrairClick(TObject *Sender)
+{
+							numero1 = ButtonedEditValor->Text.ToDouble();
+							ButtonedEditValor->Text="";
+							operador = '-' ;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonDividirClick(TObject *Sender)
+{
+							numero1 = ButtonedEditValor->Text.ToDouble();
+							ButtonedEditValor->Text="";
+							operador = '/' ;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonMultiplicarClick(TObject *Sender)
+{
+							numero1 = ButtonedEditValor->Text.ToDouble();
+							ButtonedEditValor->Text="";
+							operador = '*' ;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonResultadoClick(TObject *Sender)
+{
+					 numero2 = ButtonedEditValor->Text.ToDouble();
+					 switch(operador)
+					 {
+						case '-': total = (numero1 - numero2);break;
+						case '+': total = (numero1 + numero2);break;
+						case '*': total = (numero1 * numero2);break;
+						case '/': total = (numero1 / numero2);break;
+					 }
+            ButtonedEditValor->Text = total;
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TCalculadora::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+{
+	WORD keySubtrair = 0x6D;
+	if (Key == keySubtrair)
+	ButtonSubtrair->Click();
+
+	WORD keySomar = 0x6B;
+	if (Key == keySomar)
+	ButtonSomar->Click();
+
+	WORD keyMultiplicar = 0x6A;
+	if (Key == keyMultiplicar)
+	ButtonMultiplicar->Click();
+
+	WORD keyDividir = 0x6F;
+	if (Key == keyDividir)
+	ButtonDividir->Click();	
+
+	WORD keyResultado = 0x0D;
+	if (Key == keyResultado)
+	ButtonResultado->Click();		
+}
+//---------------------------------------------------------------------------

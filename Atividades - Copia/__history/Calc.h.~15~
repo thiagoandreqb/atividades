@@ -1,0 +1,68 @@
+//---------------------------------------------------------------------------
+
+#ifndef CalcH
+#define CalcH
+//---------------------------------------------------------------------------
+#include <System.Classes.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.StdCtrls.hpp>
+#include <Vcl.Forms.hpp>
+#include <Vcl.ExtCtrls.hpp>
+//---------------------------------------------------------------------------
+class TCalculadora : public TForm
+{
+__published:	// IDE-managed Components
+	TButton *ButtonApagar;
+	TButton *ButtonLimparAtual;
+	TButton *ButtonLimparTudo;
+	TButton *ButtonSomar;
+	TButton *ButtonDividir;
+	TButton *Button7;
+	TButton *Button8;
+	TButton *Button9;
+	TButton *ButtonSubtrair;
+	TButton *ButtonMultiplicar;
+	TButton *Button4;
+	TButton *Button5;
+	TButton *Button6;
+	TButton *Button1;
+	TButton *Button2;
+	TButton *Button3;
+	TButton *Button0;
+	TButton *ButtonVirgula;
+	TButton *ButtonResultado;
+	TButtonedEdit *ButtonedEditValor;
+	void __fastcall Button0Click(TObject *Sender);
+	void __fastcall Button1Click(TObject *Sender);
+	void __fastcall Button2Click(TObject *Sender);
+	void __fastcall Button3Click(TObject *Sender);
+	void __fastcall Button4Click(TObject *Sender);
+	void __fastcall Button5Click(TObject *Sender);
+	void __fastcall Button6Click(TObject *Sender);
+	void __fastcall Button7Click(TObject *Sender);
+	void __fastcall Button8Click(TObject *Sender);
+	void __fastcall Button9Click(TObject *Sender);
+	void __fastcall ButtonVirgulaClick(TObject *Sender);
+	void __fastcall ButtonLimparTudoClick(TObject *Sender);
+	void __fastcall ButtonSomarClick(TObject *Sender);
+	void __fastcall ButtonLimparAtualClick(TObject *Sender);
+	void __fastcall ButtonSubtrairClick(TObject *Sender);
+	void __fastcall ButtonDividirClick(TObject *Sender);
+	void __fastcall ButtonMultiplicarClick(TObject *Sender);
+	void __fastcall ButtonResultadoClick(TObject *Sender);
+	void __fastcall FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
+	void __fastcall FormShow(TObject *Sender);
+private:	// User declarations
+public:		// User declarations
+	double numero1;
+	double numero2;
+	String total;
+	char operador;
+	void Foco();
+	bool virgula;
+	__fastcall TCalculadora(TComponent* Owner);
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TCalculadora *Calculadora;
+//---------------------------------------------------------------------------
+#endif

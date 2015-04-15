@@ -1,0 +1,65 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Exemplo Vetor'
+  ClientHeight = 191
+  ClientWidth = 336
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Button1: TButton
+    Left = 96
+    Top = 55
+    Width = 168
+    Height = 25
+    Caption = 'Calcular'
+    TabOrder = 0
+    OnClick = Button1Click
+  end
+  object ButtonedEdit1: TButtonedEdit
+    Left = 199
+    Top = 19
+    Width = 121
+    Height = 21
+    TabOrder = 1
+    Text = 'ButtonedEdit1'
+  end
+  object LinkLabel1: TLinkLabel
+    Left = 27
+    Top = 20
+    Width = 157
+    Height = 20
+    Caption = 'N'#250'mero de Elementos (n<=50):'
+    TabOrder = 2
+  end
+  object LinkLabel2: TLinkLabel
+    Left = 44
+    Top = 104
+    Width = 149
+    Height = 17
+    Caption = 'Soma de todos os elementos='
+    TabOrder = 3
+  end
+  object LinkLabel3: TLinkLabel
+    Left = 108
+    Top = 135
+    Width = 85
+    Height = 17
+    Caption = 'Maior elemento='
+    TabOrder = 4
+  end
+  object LinkLabel4: TLinkLabel
+    Left = 81
+    Top = 158
+    Width = 112
+    Height = 17
+    Caption = 'M'#233'dia dos elementos='
+    TabOrder = 5
+  end
+end

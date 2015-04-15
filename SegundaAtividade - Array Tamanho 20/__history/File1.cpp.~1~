@@ -1,0 +1,44 @@
+#include <vcl.h>
+#include <windows.h>
+
+#pragma hdrstop
+#pragma argsused
+
+#include <tchar.h>
+
+#include <stdio.h>
+#include <iostream>
+using namespace std;
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+	const int TAMANHO_DO_ARRAY = 20;
+	//Arrays e Laços
+	int arrayDeInteiro[TAMANHO_DO_ARRAY];
+	arrayDeInteiro[0] = 1;
+	arrayDeInteiro[1] = 2;
+	arrayDeInteiro[2] = 4;
+	arrayDeInteiro[3] = 8;
+	arrayDeInteiro[4] = 16;
+
+	/*
+	for(inicializacao adas var; condicao de parada; incremento)
+	{
+
+	}
+	*/
+	for( int i = 5; i < 20; ++i)
+	{
+		arrayDeInteiro[i] = arrayDeInteiro[i-1] * 2;
+	}
+
+	//Arrays
+	for ( int i = 0; i <= 19; i++)
+	{
+		cout<<arrayDeInteiro[i]<<endl;
+	}
+
+
+
+	return 0;
+}

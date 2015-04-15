@@ -1,0 +1,1011 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+ Projeto Automação de Poços - AUTOPOC
+ Desenvolvimento: RN Tecnologia em Informatica LTDA.
+ Copyright 2005, 01
+
+ Projeto         : SISAL
+ Cliente         : Petrobras
+ Analistas       : João, Rodrigo e Heitor
+ Ambiente        : C++ Builder 5.0
+ Módulo          : Classe Sistema
+ Versão do Código: 5.0
+ Última alteração: Junho/2013
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+// ---------------------------------------------------------------------------
+#ifndef SistemaH
+#define SistemaH
+// ---------------------------------------------------------------------------
+
+#include "Poco.h"
+#include "PocoBM.h"
+#include "PocoBCS.h"
+#include "PocoBCP.h"
+#include "PocoGasLift.h"
+#include "PocoPlungerLift.h"
+#include "PocoSurgenteGas.h"
+#include "PocoGasLiftIntermitente.h"
+#include "ObjetoMonitor.h"
+#include "PocoInjetorAgua.h"
+#include "Servidor.h"
+#include "AutoFiltro.h"
+#include "Principal.h"
+#include "HistoricoCartasEquipamentosBM.h"
+#include "ColunaGrupos.h"
+#include "SubMenu.h"
+#include <map>
+#include "math.h"
+#include <algorithm>
+#include "AutenticacaoLDAP.h"
+#include "Usuario.h"
+#include "Alarme.h"
+#include "Utilidades.h"
+#include "FactoryFuncaoBancoSISAL.h"
+#include "CartaFundo.h"
+#include "PontoCalculado.h"
+#include "PocoPneumatico.h"
+#include "PocoGasLiftIntermitente.h"
+#include "PocoGLP.h"
+#include "PocoGLC.h"
+
+////////////////////////////////////////////////////////////////////////////////
+
+/** Dados dinâmicos para os parâmetros de controle (Comum a todos os Métodos) */
+class ParametrosControle {
+public:
+	/** Valor da variável armazenado em banco */
+	double valorBanco;
+	/** Valor da variável no controlador */
+	double valorControlador;
+	/** Variável deve ser verificada */
+	bool variavelSelecionada;
+	/** Flag para verificar se a variável está visível no Grid */
+	bool visibilidadeParametroGrid;
+	/** Verifica se o valor foi editado true = editado */
+	bool parametroEditado;
+	/** Valor exibido */
+	String valorDisplay;
+	/** Possui valor banco */
+	bool possuiValorBanco;
+	/** Possui valor Controlador */
+	bool possuiValorControlador;
+
+	/** Construtor */
+	ParametrosControle() {
+		valorBanco = 0;
+		valorControlador = 0;
+		variavelSelecionada = false;
+		parametroEditado = false;
+		visibilidadeParametroGrid = true;
+		possuiValorBanco = false;
+		possuiValorControlador = false;
+	}
+
+	~ParametrosControle() {
+	}
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+
+/** Mapeador de endereço multimap<Endereço Parâmetro, índice>
+ em função do endereço do parâmetro */
+typedef multimap<int, int>MapaPorEndereco;
+
+/** Par utilizado na inserção e controle do MultiMap de endereços */
+typedef pair<int, int>ParMapEnderecoSupervisao;
+
+/**
+ * Mapeador de código multimap<Código Parâmetro, índice> a partir do
+ *  do cod_parametro (BD).
+ */
+typedef map<int, int>MapaCodigoParametro;
+
+// Criação de Mapeador. Utilizado para obter a posição no Vector<Poco> em função
+// do Cod_Poco(BD). (Exemplo de Uso: Método tratarPciDynamicData)
+typedef map<int, int>MapaCodigoPoco;
+
+/**
+ * Criação de Mapeador. Utilizado para obter a posição no Vector<Poco> em função
+ * da String NomePoço. (Exemplo de Uso: Método SelectCell)
+ */
+typedef map<String, int>MapaNomePoco;
+
+class ConfiguracaoEscalonamento {
+public:
+	String chave_usuario;
+	int tempo_calculo_escalonamento;
+	int maxima_superposicao_aceitavel;
+	int numero_injecoes_simultaneas;
+	int estado_escalonamento;
+
+	/** Construtor */
+	ConfiguracaoEscalonamento() {
+		chave_usuario = "";
+		tempo_calculo_escalonamento = 0;
+		maxima_superposicao_aceitavel = 0;
+		numero_injecoes_simultaneas = 0;
+		estado_escalonamento = 0;
+	}
+
+	~ConfiguracaoEscalonamento() {
+	}
+};
+
+/** Definição da classe Sistema. Interface com a classe Poço, Filtros etc. */
+class Sistema {
+private:
+
+	/** Índice do poço supervisionado (Selecionado) */
+	int indicePoco;
+
+	/** Números de poços */
+	int numeroPocos;
+
+	/** Número de objetos monitores */
+	int numeroObjetosMonitores;
+
+	// ______________________________________________________________________
+
+	/** Informações do usuário conectado */
+	Usuario usuario;
+
+	/** Lista dos servidores obtidos em arquivos "servidores.ini" */
+	std::vector<Servidor>servidores;
+
+	// ______________________________________________________________________
+
+	/** Objeto da classe filtros (Definições dos Filtros) */
+	Filtros colunasFiltro;
+
+	/** Flag para ativação do sistema de autofiltro */
+	bool autoFiltro;
+
+	String filtroSelecionado;
+	String descricaoFiltroAtivo;
+
+	// ______________________________________________________________________
+
+	/** Mapeador (codigoPoco) */
+	MapaCodigoPoco mapCodigoPoco;
+
+	/** Mapeador (nomePoco) */
+	MapaNomePoco mapNomePoco;
+
+	// ______________________________________________________________________
+
+	/** Lista de poços */
+	std::vector<Poco*>pocos;
+
+	/** Lista auxiliar para armazenamento de poços selecionados manualmente */
+	std::vector<int>listaPocosVisiveisAposF5;
+
+	/** Lista de parâmetros de controle do poço selecionado */
+	std::vector<ParametrosControle>parametrosControlePocoSelecionado;
+
+	/** Lista de alarmes do SISAL */
+	std::vector<Alarme>listaAlarmes;
+
+	/** Lista de estações de produção */
+	std::vector<String>estacoesProducao;
+
+	/** Lista de códigos de controladores utilizados na lista de poços carregada */
+	std::vector<int>codigosControladoresUtilizados;
+
+	/** Lista de métodos de elevação utilizados na lista de poços carregada */
+	std::vector<int>codigosMetodoUtilizados;
+
+	/** Lista de observações -> "observacoes.cfg" */
+	std::vector<String>listaObservacoes;
+
+	/** Lista de mestres de campo */
+	std::vector<String>mestresCampo;
+
+	/** Lista de elementos do grupo1 */
+	std::vector<String>listaGrupo1;
+
+	/** Lista de elementos do grupo2 */
+	std::vector<String>listaGrupo2;
+
+	/** Lista de elementos do grupo3 */
+	std::vector<String>listaGrupo3;
+
+	/** Lista das informações das colunas grupo */
+	std::vector<ColunaGrupos>colunaGrupos;
+
+	// ______________________________________________________________________
+
+	/** Mensagem de comandos para teclados CAC BM */
+	String mensagemComandoBacker;
+
+	/** Mensagem enviada pelo servidor */
+	String mensagemServidor;
+
+	/** Mensagem do teste de comunicação */
+	StringList respostaTesteComunicacao;
+
+	/** Objeto de autenticação LDAP */
+	AutenticacaoLDAP LDAP_SISAL;
+
+	bool falhaLeituraParametros;
+
+	bool utilizarDLLCard;
+
+	bool exibeCelularCarga;
+
+	bool forcarObservacao;
+
+	bool forcarObservacaoDesligaPoco;
+
+	// Exibir linhas guias de carga
+	bool exibeLinhasGuiasCarga;
+
+	bool restricaoGrupoElevacaoCRUDEquipamentos;
+
+	int intervaloToqueAlarme;
+
+	bool atualizaListaPocos;
+	int intervaloAtualizaListaPocos;
+
+	ConfiguracaoEscalonamento configuracaoEscalonamento;
+
+	static void historiarEscritaParametrosControle(TForm *formulario, StringList &lista, int codigoPoco);
+
+	String passwordPostgres;
+
+	String usuarioPostgres;
+
+	bool exibeLinhasGuiasCargaEmResumoBM;
+
+	int abaInicialSupervisaoBM;
+
+	bool msgComprimentoHastes;
+
+	bool comboDescricaoEAEditavel;
+
+	bool comboDescricaoEDEditavel;
+
+	bool exibeMenuEscalonamento;
+
+	int quantidadeTotalDeCartasDinamometrica;
+
+	String datadeInicio;
+
+	int tempoMaximoComunicacaoInstavel;
+
+public:
+
+	TColor const PRETO;
+	/** Avaliação do tempo de solicitação após atualização de poço */
+	static TDateTime tempoSolicitacaoAtualizaPoco;
+
+	std::vector<String>& getListaGrupo1() {
+		return listaGrupo1;
+	}
+
+	std::vector<String>& getListaGrupo2() {
+		return listaGrupo2;
+	}
+
+	std::vector<String>& getListaGrupo3() {
+		return listaGrupo3;
+	}
+
+	std::vector<String>& getMestresCampo() {
+		return mestresCampo;
+	}
+
+	std::vector<String>& getEstacoesProducao() {
+		return estacoesProducao;
+	}
+
+	std::vector<String>& getListaObservacoes() {
+		return listaObservacoes;
+	}
+
+	std::vector<int>& getCodigosControladoresUtilizados() {
+		return codigosControladoresUtilizados;
+	}
+
+	std::vector<int>& getCodigosMetodoUtilizados() {
+		return codigosMetodoUtilizados;
+	}
+
+	MapaCodigoPoco& getMapCodigoPoco() {
+		return mapCodigoPoco;
+	}
+
+	MapaNomePoco& getMapNomePoco() {
+		return mapNomePoco;
+	}
+
+	int getNumeroColunas() {
+		return (int) NUM_COL_GRID;
+	}
+
+	int getNumeroServidores() {
+		return servidores.size();
+	}
+
+	String getNomeServidor(int indiceServidor) {
+		return servidores[indiceServidor].getNomeServidor();
+	}
+
+	String getIP(int indiceServidor) {
+		return servidores[indiceServidor].getIP();
+	}
+
+	bool getLogado(int indiceServidor) {
+		return servidores[indiceServidor].getEstadoServidor();
+	}
+
+	bool getPadrao(int indiceServidor) {
+		return servidores[indiceServidor].getServidorPadrao();
+	}
+
+	String getServidorLogado();
+
+	void setServidorLogado(const String &nomeServidor);
+
+	String getEnderecoIP(const String &nomeServidor);
+
+	int getPortaServidor(const String &nomeServidor);
+
+	////////////////////////////////////////////////////////////////////////////
+
+	void alocarMapeadores(MapaPorEndereco &mapaEndereco, MapaCodigoParametro &mapaCodigo);
+
+	void setFalhaLeituraParametros(const bool falhaLeituraParametros = false) {
+		this->falhaLeituraParametros = falhaLeituraParametros;
+	}
+
+	bool isFalhaLeituraParametros() {
+		return falhaLeituraParametros;
+	}
+
+	void setUtilizarDLLCard(bool utilizarDLLCard) {
+		this->utilizarDLLCard = utilizarDLLCard;
+	}
+
+	bool isUtilizarDLLCard() {
+		return utilizarDLLCard;
+	}
+
+	void setExibeCelularCarga(bool exibeCelularCarga) {
+		this->exibeCelularCarga = exibeCelularCarga;
+	}
+
+	bool isExibeCelularCarga() {
+		return exibeCelularCarga;
+	}
+
+	void setForcarObservacao(bool forcarObservacao) {
+		this->forcarObservacao = forcarObservacao;
+	}
+
+	bool isForcarObservacao() {
+		return forcarObservacao;
+	}
+
+	void setForcarObservacaoDesligaPoco(bool forcarObservacaoDesligaPoco) {
+		this->forcarObservacaoDesligaPoco = forcarObservacaoDesligaPoco;
+	}
+
+	bool isForcarObservacaoDesligaPoco() {
+		return forcarObservacaoDesligaPoco;
+	}
+
+	void setExibeLinhasGuiasCarga(bool exibeLinhasGuiasCarga) {
+		this->exibeLinhasGuiasCarga = exibeLinhasGuiasCarga;
+	}
+
+	bool isExibeLinhasGuiasCarga() {
+		return exibeLinhasGuiasCarga;
+	}
+
+	void setRestricaoGrupoElevacaoCRUDEquipamentos(bool restricaoGrupoElevacaoCRUDEquipamentos) {
+		this->restricaoGrupoElevacaoCRUDEquipamentos = restricaoGrupoElevacaoCRUDEquipamentos;
+	}
+
+	bool isRestricaoGrupoElevacaoCRUDEquipamentos() {
+		return restricaoGrupoElevacaoCRUDEquipamentos;
+	}
+
+	void setIntervaloToqueAlarme(int intervaloToqueAlarme) {
+		this->intervaloToqueAlarme = intervaloToqueAlarme;
+	}
+
+	int getIntervaloToqueAlarme() {
+		return intervaloToqueAlarme;
+	}
+
+	void setAtualizaListaPocos(bool atualizaListaPocos) {
+		this->atualizaListaPocos = atualizaListaPocos;
+	}
+
+	bool isAtualizaListaPocos() {
+		return atualizaListaPocos;
+	}
+
+	void setIntervaloAtualizaListaPocos(int intervaloAtualizaListaPocos) {
+		this->intervaloAtualizaListaPocos = intervaloAtualizaListaPocos;
+	}
+
+	int getIntervaloAtualizaListaPocos() {
+		return intervaloAtualizaListaPocos;
+	}
+
+	ConfiguracaoEscalonamento getConfiguracaoEscalonamento() {
+		return this->configuracaoEscalonamento;
+	}
+
+	// Dll da carta de fundo
+	HINSTANCE hDLL;
+
+	void(*chamarFuncaoCartaFundoDllBarreto)(float *ent, float *said);
+
+	// Dll para o cálculo de variáveis de BM
+	HINSTANCE hDLL2;
+
+	int(*chamarFuncaoCurvaTorqueDllCalculosBM)(double *ent);
+	int(*chamarFuncaoVariaveisDllCalculosBM)(double *ent);
+
+	////////////////////////////////////////////////////////////////////////////
+	// Funções de Atributos Privados da Classe Sistema
+
+	Sistema(); // Construtor
+	~Sistema(); // Destrutor
+
+	/** Retorna um ponteiro para um índice da lista de Poços/Objetos Monitores */
+	Poco* getPoco(int indicePocoSelecionado) {
+		return pocos[indicePocoSelecionado];
+	}
+
+	Poco* getPoco() {
+		return pocos[indicePoco];
+	}
+
+	std::vector<Poco*>& getVectorPocos() {
+		return pocos;
+	}
+
+	/** Retorna os mestres */
+	vector<String>& getMestres() {
+		return mestresCampo;
+	}
+
+	/** Retorna os alarmes */
+	vector<Alarme>& getAlarmes() {
+		return listaAlarmes;
+	}
+
+	vector<ColunaGrupos>& getColunaGrupos() {
+		return colunaGrupos;
+	}
+
+	// Autenticação LDAP SISAL
+	bool autenticarLDAP(String login, String password) {
+		return LDAP_SISAL.autenticar(login, password);
+	}
+
+	String getExcecaoLDAP() {
+		return LDAP_SISAL.getExcecao();
+	}
+
+	int getErroLDAP() {
+		return LDAP_SISAL.getErroLDAP();
+	}
+
+	/** Retorna o número de poços */
+	int getNumeroPocos() const {
+		return numeroPocos;
+	}
+
+	/** Retorna o número de objetos monitores */
+	void setNumeroObjetosMonitores(int numeroObjetosMonitores) {
+		this->numeroObjetosMonitores = numeroObjetosMonitores;
+	}
+
+	int getNumeroObjetos() const {
+		return numeroObjetosMonitores;
+	}
+
+	// Redimensiona o Vector de Objetos da Classe Poco
+	void redimensionarListaPocos(int numeroPocosRecebido);
+
+	// Altera e Retorna o Indice do Vetor de Objetos da Classe Poço (Somente para janelas de Supervisão)
+	inline void setIndicePoco(int indicePoco) {
+		this->indicePoco = indicePoco;
+	}
+
+	inline int getIndicePoco() const {
+		return indicePoco;
+	}
+
+	// Retorna o ID a partir do nome do poço
+	inline int getIndiceNomePoco(const String &nomePoco) {
+		return (nomePoco != "") ? mapNomePoco[nomePoco] : -1;
+	}
+
+	// Retorna o ID a partir do código poço
+	inline int getIndiceCodigoPoco(const int &codigoPoco) {
+		return mapCodigoPoco[codigoPoco];
+	}
+
+	// Verifica se uma estação já está presente na lista de para Filtro
+	void verificarNovaEstacao(const String &estacao);
+
+	// Verifica se um controlador já está presente na lista
+	void verificarNovoControlador(const int &codigoControlador);
+
+	// Verifica se um controlador já está presente na lista
+	void verificarNovoMetodo(const int &codigosMetodoUtilizados);
+
+	// Verifica se um mestre de campo já está presente na lista de para Filtro
+	void verificarNovoMestre(const String &mestre);
+
+	/** Verificar existência de grupo na lista */
+	void verificarNovoGrupo1(const String &grupo);
+
+	/** Verificar existência de grupo na lista */
+	void verificarNovoGrupo2(const String &grupo);
+
+	/** Verificar existência de grupo na lista */
+	void verificarNovoGrupo3(const String &grupo);
+
+	// Retorna o nome de estações para filtro
+	const String getNomeEstacoes(int indiceEstacao) {
+		return estacoesProducao[indiceEstacao];
+	}
+
+	/** Retorna o número de estações */
+	const unsigned getNumeroEstacoes() {
+		return estacoesProducao.size();
+	}
+
+	/** Retorna o número de mestres */
+	const unsigned getNumeroMestres() {
+		return mestresCampo.size();
+	}
+
+	/** Retorna o número de mestres */
+	const unsigned getNumeroGrupo1() {
+		return listaGrupo1.size();
+	}
+
+	/** Retorna o número de mestres */
+	const unsigned getNumeroGrupo2() {
+		return listaGrupo2.size();
+	}
+
+	/** Retorna o número de mestres */
+	const unsigned getNumeroGrupo3() {
+		return listaGrupo3.size();
+	}
+
+	// Retorna o nome dos mestres para filtro
+	const String getNomeMestre(int indiceMestre) {
+		return mestresCampo[indiceMestre];
+	}
+
+	/** Retorna os nomes dos grupos 1 */
+	const String getNomeGrupo1(int indiceGrupo) {
+		return listaGrupo1[indiceGrupo];
+	}
+
+	/** Retorna os nomes dos grupos 2 */
+	const String getNomeGrupo2(int indiceGrupo) {
+		return listaGrupo2[indiceGrupo];
+	}
+
+	/** Retorna os nomes dos grupos 3 */
+	const String getNomeGrupo3(int indiceGrupo) {
+		return listaGrupo3[indiceGrupo];
+	}
+
+	/** Retorna as opções de observação para filtro */
+	const String getObservacaoPredefinida(int indiceOBS) {
+		return listaObservacoes[indiceOBS];
+	}
+
+	// Retorna o número de opções de observação para filtro
+	int getNumeroObservacoesPredefinidas() {
+		return listaObservacoes.size();
+	}
+
+	// Define e retorna o flag para ativação/desativação do AutoFiltro
+	void setAutoFiltro(bool autoFiltro) {
+		this->autoFiltro = autoFiltro;
+	}
+
+	bool isAutoFiltro() const {
+		return autoFiltro;
+	}
+
+	// Mensagem de comandos para teclados backer BM
+	String getMensagemComandoBacker() const {
+		return mensagemComandoBacker;
+	}
+
+	/** Retorna a mensagem do teste de comunicação com o poço */
+	StringList& getRespostaTesteComunicacao() {
+		return respostaTesteComunicacao;
+	}
+
+	/** Retorna a mensagem enviada pelo servidor */
+	String getMensagemServidor() const {
+		return mensagemServidor;
+	}
+	////////////////////////////////////////////////////////////////////////////
+
+	void salvarFiltroSelecionado() {
+		colunasFiltro.salvarFiltroSelecionado();
+	}
+
+	void aplicarFiltroSelecionado() {
+		colunasFiltro.aplicarFiltroSelecionado();
+	}
+
+	void aplicarFiltroAtalho() {
+		colunasFiltro.aplicarFiltroAtalho();
+	}
+
+	String getStringFiltroSalvar() {
+		return colunasFiltro.prepararStringFiltroSalvar();
+	}
+
+	void abrirAplicarStringFiltro(String linhaFiltro) {
+		colunasFiltro.abrirAplicarStringFiltro(linhaFiltro);
+	}
+
+	////////////////////////////////////////////////////////////////////////////
+	// Inicialização de informações dinâmicas de Parâmetros de Controle.
+	void iniciarParametros(); // Parâmetros Dinâmicos
+
+	void fimParametros() {
+		parametrosControlePocoSelecionado.clear();
+	} // Finaliza lista de dados Dinâmicos dos Parâmetros
+	////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////
+	// Permissões de usuário e configurações (colunas)
+	void tratarPciLogin(StringList &lista);
+	////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////
+	// Métodos de alarmes
+
+	/** Retorna o nome de um alarme através do índice do vector de alarme */
+	const String getNomeAlarmeIndice(int indiceAlarme) {
+		return listaAlarmes[indiceAlarme].nomeAlarme;
+	}
+
+	/** Retorna o nome de um alarme através do código do alarme */
+	String getNomeAlarme(int codigoAlarme);
+
+	/** Retorna o tipo de alarme (Utilizado na pintura do grid de poços) */
+	int getGrupoAlarme(int codigoAlarme);
+
+	/** Retorna o índice do vector de alarme  a partir do código de alarme
+	 (Utilizado no AutoFiltro) */
+	int getIndiceVectorAlarmesCodigo(int codigoAlarme);
+
+	/** Retorna o código do alarme a partir do índice do vector */
+	int getCodigoAlarmeIndice(int indiceAlarme) {
+		return listaAlarmes[indiceAlarme].codigoAlarme;
+	}
+
+	/** Retorna o tipo de definição do alarme; 1 - Usuário e 0 - Sistema */
+	int getTipoDefinicaoAlarme(int indiceAlarme) {
+		return listaAlarmes[indiceAlarme].tipoUsuario;
+	}
+
+	/** Retorna o número de alarmes cadastrados no SISAL */
+	unsigned getNumeroAlarmes() {
+		return listaAlarmes.size();
+	}
+
+	////////////////////////////////////////////////////////////////////////////
+
+	// Define e Retorna se um Parâmetro de Controle deve ser Atualizado
+	void setParametroSelecionado(int indiceParametro, bool selecionado) {
+		parametrosControlePocoSelecionado[indiceParametro].variavelSelecionada = selecionado;
+	}
+
+	bool isParametroSelecionado(int indiceParametro) const {
+		return parametrosControlePocoSelecionado[indiceParametro].variavelSelecionada;
+	}
+
+	// Parâmetro de Controle foi editado?
+	void setParametroEditado(int indiceParametro, bool editado) {
+		parametrosControlePocoSelecionado[indiceParametro].parametroEditado = editado;
+	}
+
+	bool getParametroEditado(int indiceParametro) const {
+		return parametrosControlePocoSelecionado[indiceParametro].parametroEditado;
+	}
+
+	// Define e retorna se o parâmetro de controle deve ser visível
+	void setVisibilidadeParametroGrid(int indiceParametro, bool visibilidade) {
+		parametrosControlePocoSelecionado[indiceParametro].visibilidadeParametroGrid = visibilidade;
+	}
+
+	bool getVisibilidadeParametroGrid(int indiceParametro) const {
+		return parametrosControlePocoSelecionado[indiceParametro].visibilidadeParametroGrid;
+	}
+
+	// Define e Retorna o Valor do Parâmetro de Controle no Controlador
+	// void setValorControlador(int indiceParametro, double Val){parametrosControlePocoSelecionado[indiceParametro].valorControlador = Val;}
+	void setValorControlador(int indiceParametro, String valor);
+
+	double getValorControlador(int indiceParametro) const {
+		return parametrosControlePocoSelecionado[indiceParametro].valorControlador;
+	}
+
+	void setValorBanco(int indiceParametro, double Val) {
+		parametrosControlePocoSelecionado[indiceParametro].valorBanco = Val;
+	}
+
+	double getValorBanco(int indiceParametro) const {
+		return parametrosControlePocoSelecionado[indiceParametro].valorBanco;
+	}
+
+	void setPossuiValorBanco(int indiceParametro, bool possui) {
+		parametrosControlePocoSelecionado[indiceParametro].possuiValorBanco = possui;
+	}
+
+	bool getPossuiValorBanco(int indiceParametro) const {
+		return parametrosControlePocoSelecionado[indiceParametro].possuiValorBanco;
+	}
+
+	void setPossuiValorControlador(int indiceParametro, bool possui) {
+		parametrosControlePocoSelecionado[indiceParametro].possuiValorControlador = possui;
+	}
+
+	bool getPossuiValorControlador(int indiceParametro) const {
+		return parametrosControlePocoSelecionado[indiceParametro].possuiValorControlador;
+	}
+
+	String getValorControladorDisplay(int indiceParametro) const {
+		return parametrosControlePocoSelecionado[indiceParametro].valorDisplay;
+	}
+
+	////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////
+	// Métodos de tratamento de funções PCI          (Processo receptor)
+
+	void tratarPciMsg(StringList &lista);
+
+	/** Lista de informações de poços(Dynamic Data) por mestre de campo */
+	void tratarPciAllDynamicData(StringList &lista);
+
+	// Atualização de poços (linhas no grid)
+	void tratarPciDynamicData(StringList &lista, const int &codigoPoco);
+
+	/** Obtem a lista de controladores do servidor */
+	void tratarPciControlList(StringList &lista) {
+		Poco::iniciarListaControladores(lista);
+	}
+
+	/** Tratar parâmetros de leitura no controlador */
+	void tratarPciGetParam(StringList &lista);
+
+	// Trata resultado de set parâmetros
+	void tratarPciSetParam(const int &sucesso);
+
+	/** Tratar mensagem do teste de comunicação */
+	void tratarWellComunicationTeste(StringList &lista);
+
+	/** Tratar mensagem do reset de comunicação */
+	void tratarPciResetComunication(int poco, int Sucesso);
+
+	/** Tratar set poc position */
+	void tratarSetPocPosition(const int &sucesso);
+
+	/** Tratar set poc position */
+	void tratarSetPocPositionFundo(const int &sucesso);
+
+	/** Tratar respostas de comandos de teclados BM (Controladores Backer) */
+	void tratarPciCommandController(StringList &lista);
+
+	////////////////////////////////////////////////////////////////////////////
+
+	/** Abrir janela de controle para poço selecionado */
+	void abrirJanelaControle();
+
+	////////////////////////////////////////////////////////////////////////////
+
+	/** Retorna o usuário autenticado */
+	Usuario& getUsuario() {
+		return usuario;
+	}
+
+	////////////////////////////////////////////////////////////////////////////
+
+	/** Método para retornar valor SISAL para configuração automática de controlado */
+	String getValorSISAL(int indice, int indicePocoLocal, int indiceParametro);
+
+	////////////////////////////////////////////////////////////////////////////
+
+	static void enviarFuncao(CodFuncao codigoFuncao, TForm* form, StringList &lista);
+	static void enviarFuncao(CodFuncao codigoFuncao, TForm* form, StringList &lista, int codigoPoco);
+	static void enviarFuncao(CodFuncao codigoFuncao, TForm* form, StringList &lista, StringList &lista2, int codigoPoco);
+	static void enviarFuncao(CodFuncao codigoFuncao, TForm* form, int parametro);
+	static void enviarFuncao(CodFuncao codigoFuncao, TForm* form, int codigoPoco, int parametro);
+	static void enviarFuncao(CodFuncao codigoFuncao, TForm* form);
+	static void enviarFuncao(CodFuncao codigoFuncao, TForm* form, bool semPoco);
+	static void enviarFuncaoBasicaPoco(CodFuncao codigoFuncao, TForm* form, int codigoPoco);
+
+	/** Enviar função PCI do tipo geral - não é para um poço específico */
+	static void enviarFuncaoPocos(CodFuncao codigoFuncao, TForm* form);
+
+	void inserirAlarmesSISALemComboBox(TComboBox *cmb);
+
+	void inserirAlarmesVector(vector<int>&alarmesVector);
+
+	////////////////////////////////////////////////////////////////////////////
+
+	void rotearRespostas(StringList &lista, int funcao, TForm *form);
+
+	void rotearVisualizacao(int funcao, TForm *form, int sucessoResposta);
+
+	////////////////////////////////////////////////////////////////////////////
+
+	/** Retorna a variável de controle das colunas e filtros */
+	Filtros& getColunasFiltros() {
+		return colunasFiltro;
+	}
+
+	void setColunasFiltros(Filtros& colunasFiltro) {
+		this->colunasFiltro = colunasFiltro;
+	}
+
+	void armazenarPocosVisiveisAposF5();
+
+	void exibirPocosVisiveisAposF5();
+
+	////////////////////////////////////////////////////////////////////////////
+
+	int calcularCurvaTorque(double *vetorEntradaSaida);
+
+	/** Calcular carta de fundo para cartas de histórico com método de Barreto */
+	bool calcularCartaDeFundoHistoricoMetodoBarreto(CartaHistorico &cartaHistorico, int indiceCarta, float *saidaCartaFundo);
+
+	/** Calcular carta de fundo para cartas de histórico com método de Toinho */
+	bool calcularCartaFundoHistoricoMetodoToinho(CartaHistorico &cartaHistorico, int indiceCarta, float *vetorPontosCartaFundo);
+
+	/**
+	 * Calcular variáveis BM a partir de calculosBM.dll. As variáveis são:
+	 * PRHP, Área da Carta, Smin, Sadm, Smax.
+	 *
+	 * O vetor de entrada (double) tamanho 1500 deve possuir os seguintes dados de entrada:
+	 *
+	 * entrada[0] => Número de pontos da carta
+	 * entrada[1] => CPM
+	 * entrada[2] => Diâmetro da primeira seção de haste
+	 * entrada[3] => Tensão mínima de ruptura
+	 * entrada[4] => Grau do aço (Teste para grau do tipo E)
+	 * entrada[20] = posicao
+	 * entrada[21] = carga
+	 * ...
+	 * entrada[1000] = PRHP (hp)
+	 * entrada[1001] = Área da carta (J)
+	 * entrada[1002] = Smin (lbf/cm²)
+	 * entrada[1003] = Smax (lbf/cm²)
+	 */
+	int calcularVariaveisCartaHistoricoDllCalculosBM(double *entrada);
+
+	String getFiltroSelecionado() {
+		return this->filtroSelecionado;
+	};
+
+	void setFiltroSelecionado(String filtroSelecionado) {
+		this->filtroSelecionado = filtroSelecionado;
+	};
+
+	String getDescricaoFiltroAtivo() {
+		return this->descricaoFiltroAtivo;
+	};
+
+	void setDescricaoFiltroAtivo(String descricaoFiltroAtivo) {
+		this->descricaoFiltroAtivo = descricaoFiltroAtivo;
+	};
+
+	String getPasswordPostgres() {
+		return this->passwordPostgres;
+	};
+
+	void setPasswordPostgres(String passwordPostgres) {
+		this->passwordPostgres = passwordPostgres;
+	};
+
+	String getUsuarioPostgres() {
+		return this->usuarioPostgres;
+	};
+
+	void setUsuarioPostgres(String usuarioPostgres) {
+		this->usuarioPostgres = usuarioPostgres;
+	};
+
+	void setExibeLinhasGuiasCargaEmResumoBM(bool exibeLinhasGuiasCargaEmResumoBM) {
+		this->exibeLinhasGuiasCargaEmResumoBM = exibeLinhasGuiasCargaEmResumoBM;
+	}
+
+	bool isExibeLinhasGuiasCargaEmResumoBM() {
+		return exibeLinhasGuiasCargaEmResumoBM;
+	}
+
+	void setAbaInicialSupervisaoBM(int abaInicialSupervisaoBM) {
+		this->abaInicialSupervisaoBM = abaInicialSupervisaoBM;
+	}
+
+	int getAbaInicialSupervisaoBM() {
+		return abaInicialSupervisaoBM;
+	}
+
+	void setMsgComprimentoHastes(bool msgComprimentoHastes) {
+		this->msgComprimentoHastes = msgComprimentoHastes;
+	}
+
+	bool isMsgComprimentoHastes() {
+		return msgComprimentoHastes;
+	}
+
+	void setComboDescricaoEAEditavel(bool comboDescricaoEAEditavel) {
+		this->comboDescricaoEAEditavel = comboDescricaoEAEditavel;
+	}
+
+	bool isComboDescricaoEAEditavel() {
+		return comboDescricaoEAEditavel;
+	}
+
+	void setComboDescricaoEDEditavel(bool comboDescricaoEDEditavel) {
+		this->comboDescricaoEDEditavel = comboDescricaoEDEditavel;
+	}
+
+	bool isComboDescricaoEDEditavel() {
+		return comboDescricaoEDEditavel;
+	}
+
+	void setExibeMenuEscalonamento(bool exibeMenuEscalonamento) {
+		this->exibeMenuEscalonamento = exibeMenuEscalonamento;
+	}
+
+	bool isExibeMenuEscalonamento() {
+		return exibeMenuEscalonamento;
+	}
+
+	void setQuantidadeTotalDeCartasDinamometrica(int quantidadeTotalDeCartasDinamometrica) {
+		this->quantidadeTotalDeCartasDinamometrica = quantidadeTotalDeCartasDinamometrica;
+	}
+
+	int getQuantidadeTotalDeCartasDinamometrica() {
+		return quantidadeTotalDeCartasDinamometrica;
+	}
+
+	void setDatadeInicio(String datadeInicio) {
+		this->datadeInicio = datadeInicio;
+	}
+
+	String getDatadeInicio() {
+		return datadeInicio;
+	}
+
+	void setTempoMaximoComunicacaoInstavel(int tempoMaximoComunicacaoInstavel) {
+		this->tempoMaximoComunicacaoInstavel = tempoMaximoComunicacaoInstavel;
+	}
+
+	int getTempoMaximoComunicacaoInstavel() {
+		return tempoMaximoComunicacaoInstavel;
+	}
+
+	SubMenu menu[10]; ;
+};
+
+extern Sistema S;
+
+#endif

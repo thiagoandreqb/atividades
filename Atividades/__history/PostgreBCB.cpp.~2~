@@ -1,0 +1,217 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "PostgreBCB.h"
+#include "Utilidades.h"
+#include "Log.h"
+#include "dllHIlcs105.h"
+
+//---------------------------------------------------------------------------
+
+#pragma package(smart_init)
+
+Postgre BD;
+Postgre QuerySISAL;
+Postgre bancoSISAL;
+Postgre bancoUsuario;
+
+//------------------------------------------------------------------------
+Postgre::Postgre()
+{
+  conn = NULL;
+
+	String dll = "libpq.dll";
+	hDLL = LoadLibrary(dll.c_str());
+
+  if (hDLL == NULL) Application->Terminate();
+
+  //Obter endereço da função PQsetdbLogin
+  PQsetdbLogin = (PGconn* (*)(const char *pghost,
+                     const char *pgport,
+                     const char *pgoptions,
+                     const char *pgtty,
+                     const char *dbName,
+                     const char *login,
+                     const char *pwd)) GetProcAddress (hDLL , "PQsetdbLogin");
+
+  //Obter endereço da função PQstatus
+  PQstatus = (ConnStatusType (*) (const PGconn *conn)) GetProcAddress (hDLL , "PQstatus");
+
+  //Obter endereço da função PQfinish
+  PQfinish = (void (*)(PGconn *conn)) GetProcAddress (hDLL , "PQfinish");
+
+  //Obter endereço da função PQexec
+  PQexec = (PGresult* (*)(PGconn *conn, const char *command)) GetProcAddress (hDLL , "PQexec");
+
+  //Obter endereço da função PQresultStatus
+	PQresultStatus = (ExecStatusType (*)(const PGresult *res)) GetProcAddress (hDLL , "PQresultStatus");
+
+  //Obter endereço da função PQclear
+  PQclear = (void (*) (PGresult *res)) GetProcAddress (hDLL , "PQclear");
+
+  //Obter endereço da função PQerrorMessage
+  PQerrorMessage = (char* (*)(const PGconn* conn)) GetProcAddress (hDLL , "PQerrorMessage");
+
+  //Obter endereço da função PQgetvalue
+  PQgetvalue = (char* (*) (const PGresult *res,
+                 int row_number,
+                 int column_number)) GetProcAddress (hDLL, "PQgetvalue");
+
+  //Obter endereço da função PQntuples
+  PQntuples = (int (*) (const PGresult *res)) GetProcAddress (hDLL, "PQntuples");
+
+  //Obter endereço da função PQnfields
+  PQnfields = (int (*) (const PGresult *res)) GetProcAddress (hDLL, "PQnfields");
+
+	//Obter endereço da função PQfname
+  PQfname = (char* (*) (const PGresult *res, int column_number)) GetProcAddress (hDLL, "PQfname");
+
+  //Obter endereço da função PQreset
+  PQreset = (void (*)(PGconn *conn)) GetProcAddress (hDLL, "PQreset");
+}
+//------------------------------------------------------------------------
+Postgre::~Postgre()
+{
+  if (hDLL != NULL) FreeLibrary(hDLL);
+}
+//------------------------------------------------------------------------
+bool Postgre::executarComandoSQL(const String comandoSQL)
+{
+  if(comandoSQL.IsEmpty())
+  {
+    String mensagem = "O comando SQL não pôde ser executado!";
+    Application->MessageBox(String(mensagem).c_str(),String("Erro. Contate o administrador do sistema").c_str(), MB_OK | MB_ICONERROR);
+    return false;
+  }
+
+  PQclear(res);
+  if(conn == NULL)
+	{
+    logErro.inserirErro("Postgre::executarComandoSQL(const String comandoSQL)::conexão nula no comando: "+String(comandoSQL));
+    return false;
+  }
+
+  res = PQexec(conn, AnsiString(comandoSQL).c_str());
+
+  if (PQresultStatus(res) == PGRES_COMMAND_OK)
+    return true;
+  else
+	{
+		MessageBox(String((String) PQerrorMessage(conn)),mtError);
+		logErro.inserirErro("Postgre::executarComandoSQL(const String comandoSQL):: "+String((String) PQerrorMessage(conn)));
+    return  false;
+  }
+}
+//------------------------------------------------------------------------
+bool Postgre::executarConsultaSQL(const String consultaSQL)
+{
+	if(consultaSQL.IsEmpty())
+  {
+    String mensagem = "A consulta SQL não pôde ser executada!";
+    Application->MessageBox(String(mensagem).c_str(),String("Erro. Contate o administrador do sistema").c_str(), MB_OK | MB_ICONERROR);
+    return false;
+  }
+  numeroRegistros = 0;
+  numeroCampos = 0;
+
+  PQclear(res);
+  if(conn == NULL)
+  {
+    logErro.inserirErro("Postgre::executarConsultaSQL(const String consultaSQL):Conexão nula na consulta: "+String(consultaSQL));
+    return false;
+  }
+
+  res = PQexec(conn, AnsiString(consultaSQL).c_str());
+
+  if (PQresultStatus(res) == PGRES_TUPLES_OK)
+  {
+    numeroRegistros = PQntuples(res);
+    numeroCampos = PQnfields(res);
+    return true;
+	}
+  else
+  {
+    logErro.inserirErro("Postgre::executarConsultaSQL(const String consultaSQL): "+String((String) PQerrorMessage(conn)));
+    return false;
+  }
+}
+//------------------------------------------------------------------
+const String Postgre::testarErroConsultaSQL(const String consultaSQL)
+{
+  numeroRegistros = 0;
+  numeroCampos = 0;
+
+  res = PQexec(conn, AnsiString(consultaSQL).c_str());
+
+  if (PQresultStatus(res) == PGRES_TUPLES_OK)
+  {
+    numeroRegistros = PQntuples(res);
+    numeroCampos = PQnfields(res);
+	}
+  else
+  {
+    return (String) PQerrorMessage(conn);
+  }
+  return "";
+}
+//------------------------------------------------------------------
+bool Postgre::conectarBanco(const String &servidor,const String &usuario,
+const String &passWord,const String &banco)
+{
+  conn = PQsetdbLogin(AnsiString(servidor).c_str(),"5432",NULL,NULL, AnsiString(banco).c_str(),
+                      AnsiString(usuario).c_str(),AnsiString(passWord).c_str());
+
+  if (PQstatus(conn) == CONNECTION_BAD)
+  {
+    PQfinish(conn);
+    return false;
+  }
+
+  return true;
+}
+//------------------------------------------------------------------
+void Postgre::desconectar()
+{
+  try
+  {
+    if (conn != NULL)
+      PQfinish(conn);
+
+    conn = NULL;
+  }
+  catch(Exception &exception)
+  {
+    //...
+  }
+}
+//------------------------------------------------------------------
+String Postgre::getValor(int linha, int coluna)
+{
+  return (String) PQgetvalue(res,linha,coluna);
+}
+//------------------------------------------------------------------
+bool Postgre::verificarEstadoConexao()
+{
+  if (conn == NULL) return false;
+
+  try
+  {
+    if (PQstatus(conn) != CONNECTION_OK)
+    {
+      if (conn != NULL)
+        PQreset(conn);
+
+      if (PQstatus(conn) == CONNECTION_OK)
+        return true;
+      else
+        return false;
+    }
+  }
+  catch(Exception &exception)
+  {
+    return false;
+  }
+  return true;
+}

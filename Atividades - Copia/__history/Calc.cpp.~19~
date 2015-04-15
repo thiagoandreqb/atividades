@@ -1,0 +1,386 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "Calc.h"
+#include "math.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TCalculadora *Calculadora;
+//---------------------------------------------------------------------------
+__fastcall TCalculadora::TCalculadora(TComponent* Owner)
+	: TForm(Owner)
+{
+}
+//---------------------------------------------------------------------------
+
+void TCalculadora::Foco()
+{
+	ButtonedEditValor->SetFocus();
+	ButtonedEditValor->SelStart = 99999;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button0Click(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == 0 )
+	{
+		ButtonedEditValor->Text = 0;
+	}
+	else
+	{
+		ButtonedEditValor->Text =	ButtonedEditValor->Text + 0;
+		Foco();
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button1Click(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == 0 )
+	{
+		ButtonedEditValor->Text = 1;
+	}
+	else
+	{
+		ButtonedEditValor->Text = ButtonedEditValor->Text +  1;
+		Foco();
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button2Click(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == 0 )
+	{
+		ButtonedEditValor->Text = 2;
+	}
+	else
+	{
+		ButtonedEditValor->Text = ButtonedEditValor->Text + 2;
+		Foco();
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button3Click(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == 0 )
+	{
+		ButtonedEditValor->Text = 3;
+	}
+	else
+	{
+		ButtonedEditValor->Text = ButtonedEditValor->Text + 3;
+		Foco();
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button4Click(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == 0 )
+	{
+		ButtonedEditValor->Text = 4;
+	}
+	else
+	{
+		ButtonedEditValor->Text = ButtonedEditValor->Text + 4;
+		Foco();
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button5Click(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == 0 )
+	{
+		ButtonedEditValor->Text = 5;
+	}
+	else
+	{
+		ButtonedEditValor->Text = ButtonedEditValor->Text + 5;
+		Foco();
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button6Click(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == 0 )
+	{
+		ButtonedEditValor->Text = 6;
+	}
+	else
+	{
+		ButtonedEditValor->Text = ButtonedEditValor->Text + 6;
+		Foco();
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button7Click(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == 0 )
+	{
+		ButtonedEditValor->Text = 7;
+	}
+	else
+	{
+		ButtonedEditValor->Text = ButtonedEditValor->Text + 7;
+		Foco();
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button8Click(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == 0 )
+	{
+		ButtonedEditValor->Text = 8;
+	}
+	else
+	{
+		ButtonedEditValor->Text = ButtonedEditValor->Text + 8;
+		Foco();
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::Button9Click(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == 0 )
+	{
+		ButtonedEditValor->Text = 9;
+	}
+	else
+	{
+		ButtonedEditValor->Text = ButtonedEditValor->Text + 9;
+		Foco();
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonVirgulaClick(TObject *Sender)
+{
+	if (virgula == true)
+	{
+		Foco();
+	}
+	else
+	{
+		if (ButtonedEditValor->Text == "")
+		{
+			ButtonedEditValor->Text = "0,";
+		}
+		else
+		{
+			ButtonedEditValor->Text = ButtonedEditValor->Text + ",";
+			Foco();
+			virgula = true;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonLimparAtualClick(TObject *Sender)
+{
+	ButtonedEditValor->Text = "0";
+	ButtonedEditOperador->Text = "";
+	Foco();
+	virgula = false;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonLimparTudoClick(TObject *Sender)
+{
+	ButtonedEditValor->Text = "0";
+										numero1 = 0;
+										numero2 = 0;
+										total   = 0;
+	ButtonedEditOperador->Text = "";
+	Foco();
+	virgula = false;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonSomarClick(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == "")
+	{
+		operador = '+';
+		ButtonedEditOperador->Text = (String)numero1 + "" + operador;
+		ButtonedEditValor->Text = "";
+	}
+	else
+	{
+		numero1 = ButtonedEditValor->Text.ToDouble();
+													operador = '+';
+		ButtonedEditOperador->Text = (String)numero1 + "" + operador;
+		ButtonedEditValor->Text = "";
+		Foco();
+		virgula = false;
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonSubtrairClick(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == "")
+	{
+		operador = '-';
+		ButtonedEditOperador->Text = (String)numero1 + "" + operador;
+		ButtonedEditValor->Text = "";
+	}
+	else
+	{
+		numero1 = ButtonedEditValor->Text.ToDouble();
+													operador = '-';
+		ButtonedEditOperador->Text = (String)numero1 + "" + operador;
+		ButtonedEditValor->Text = "";
+		Foco();
+		virgula = false;
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonDividirClick(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == "")
+	{
+		operador = '/';
+		ButtonedEditOperador->Text = (String)numero1 + "" + operador;
+		ButtonedEditValor->Text = "";
+	}
+	else
+	{
+		numero1 = ButtonedEditValor->Text.ToDouble();
+													operador = '/';
+		ButtonedEditOperador->Text = (String)numero1 + "" + operador;
+		ButtonedEditValor->Text = "";
+		Foco();
+		virgula = false;
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonMultiplicarClick(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == "")
+	{
+		operador = '*';
+		ButtonedEditOperador->Text = (String)numero1 + "" + operador;
+		ButtonedEditValor->Text = "";
+	}
+	else
+	{
+		numero1 = ButtonedEditValor->Text.ToDouble();
+													operador = '*';
+		ButtonedEditOperador->Text = (String)numero1 + "" + operador;
+		ButtonedEditValor->Text = "";
+		Foco();
+		virgula = false;
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::ButtonResultadoClick(TObject *Sender)
+{
+	if (ButtonedEditValor->Text == "")
+	{
+		operador = '/';
+	}
+	else
+	{
+		numero2 = ButtonedEditValor->Text.ToDouble();
+		if (numero2 == 0 && operador == '/')
+		{
+				ShowMessage ("Impossível dividir por zero");
+				Foco();
+		}
+		else
+		{
+			switch(operador)
+			{
+				case '-': total = (numero1 - numero2);break;
+				case '+': total = (numero1 + numero2);break;
+				case '*': total = (numero1 * numero2);break;
+				case '/': total = (numero1 / numero2);break;
+			}
+				ButtonedEditValor->Text = total;
+				ButtonedEditOperador->Text = "";
+				Foco();
+				virgula = false;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TCalculadora::FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift)
+{
+	WORD keySubtrair = 109;
+	if (Key == keySubtrair)
+		ButtonSubtrair->Click();
+
+	WORD keySomar = 107;
+	if (Key == keySomar)
+		ButtonSomar->Click();
+
+	WORD keyMultiplicar = 106;
+	if (Key == keyMultiplicar)
+		ButtonMultiplicar->Click();
+
+	WORD keyDividir = 111;
+	if (Key == keyDividir)
+		ButtonDividir->Click();
+
+	WORD keyResultado = 13;
+	if (Key == keyResultado)
+		ButtonResultado->Click();
+
+	WORD keyLimparTudo = 27;
+	if (Key == keyLimparTudo)
+		ButtonLimparTudo->Click();
+
+	WORD keyVirgula = 188;
+	if (Key == keyVirgula)
+			virgula = false;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::FormShow(TObject *Sender)
+{
+	ButtonedEditValor->Text = 0;
+	Foco();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TCalculadora::FormKeyUp(TObject *Sender, WORD &Key, TShiftState Shift)
+
+{
+	if (ButtonedEditValor->Text == '+')
+	{
+		ButtonedEditValor->Text = "";
+	}
+
+	if (ButtonedEditValor->Text == '-')
+	{
+		ButtonedEditValor->Text = "";
+	}
+
+	if (ButtonedEditValor->Text == '*')
+	{
+		ButtonedEditValor->Text = "";
+	}
+
+	if (ButtonedEditValor->Text == '/')
+	{
+		ButtonedEditValor->Text = "";
+	}
+}
+//---------------------------------------------------------------------------
+
+

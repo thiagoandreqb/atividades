@@ -1,0 +1,301 @@
+/*
+  * Esta janela realiza o cadastro, exlusão e alteração Fabricantes de UB.
+*/
+
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "CarregarEstacoes.h"
+#include "CadastroPoco.h"
+#include "CadastroUB.h"
+#include "PostgreBCB.h"
+#include "Utilidades.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma link "AdvGrid"
+#pragma link "AdvObj"
+#pragma link "BaseGrid"
+#pragma resource "*.dfm"
+TfrmCadastroFabricanteUB *frmCadastroFabricanteUB;
+//---------------------------------------------------------------------------
+__fastcall TfrmCadastroFabricanteUB::TfrmCadastroFabricanteUB(TComponent* Owner)
+  : TForm(Owner)
+{
+  //Inicialização do Flag de Expansão da Janela
+  Detalhes = false;
+
+  //Inicialização do Flag de Atualização
+  Update = false;
+
+  //Inicialização da Variável de Registro
+  Registro = 1;
+
+  //Formatação do Grid
+  stgFabricante->ColWidths[0] = 323;
+  stgFabricante->Cells[0][0] = "Fabricante de UB";
+
+  //Iniciar com campos desabilitados
+  DesabilitaCampos();  
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::btnDetalhesClick(TObject *Sender)
+{
+  //Modifica Exibição da Janela
+  Detalhes = !Detalhes;
+
+  if (Detalhes)       //Visível
+  {
+    frmCadastroFabricanteUB->Height = 350;
+    stgFabricante->Visible = true;
+    btnEditar->Visible = true;
+    btnExcluir->Visible = true;
+    lblTexto->Visible = true;
+    lblTexto1->Visible = true;
+  }
+  else               //Invisível
+  {
+    frmCadastroFabricanteUB->Height = 130;
+    stgFabricante->Visible = false;
+    btnEditar->Visible = false;
+    btnExcluir->Visible = false;
+    lblTexto->Visible = false;
+    lblTexto1->Visible = false;
+  }
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::btnCancelarClick(TObject *Sender)
+{
+  //Resert do Flag de Atualização
+  Update = false;
+
+  //Limpar Campos
+  LimparCampos();
+
+  //Modificar Caption para Cadastro
+  btnCadastrar->Caption = "&Cadastrar";
+  btnCadastrar->Enabled = true;
+
+  //Habilitar Campos para Edição
+  HabilitaCampos();
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::btnCadastrarClick(TObject *Sender)
+{
+  //Variáveis
+  String fabricante;
+
+  //Verifica Preenchimento de Campos
+  if (VerificaCampos()) return;
+
+  //Atribuição de Valores
+  fabricante = edtFabricante->Text;
+
+  //Flag de Verificação da Execução dos Comandos SQL
+  bool ret;
+
+  //Iniciar Transação
+  ret = BD.executarComandoSQL("begin;");
+
+  if (Update)
+  {
+    //Execução do SQL de Update
+    ret = BD.executarComandoSQL("update fabricante_ub set nome ='" + fabricante +
+                     "' where cod_fabricante_ub =" + (String) cod[Registro-1]);
+  }
+  else
+    //Execução do SQL de Insert
+    ret = BD.executarComandoSQL("insert into fabricante_ub (nome) values ('" +
+                     fabricante +"')");
+
+  if (ret)  BD.executarComandoSQL("commit;");
+  else  BD.executarComandoSQL("rollback;");
+
+  if (Update)
+    if(ret)
+			MessageBox("Fabricante de UB atualizado com sucesso.",mtInformation);
+
+  if (!Update)
+    if(ret)
+			MessageBox("Fabricante de UB cadastrado com sucesso.",mtInformation);
+
+
+  //Exibição de Valores
+  if (ret)  ExibeCampos();
+  if (!Update && ret) LimparCampos();
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::FormShow(TObject *Sender)
+{
+  //Centralizar Janela
+  this->Left = Screen->Width/2 - this->Width/2;
+  this->Top = Screen->Height/2 - this->Height/2;
+
+  //Exibição de Campos
+  if (!Update) ExibeCampos();
+
+  //Habilitar Campos para Edição
+  if (Update) HabilitaCampos();
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::btnExcluirClick(TObject *Sender)
+{
+  //Verifica se o Usuário não selecionou um registro válido
+  if (Registro == 0)  return;
+
+  //Nome do Campo de Produção
+  const String nome = stgFabricante->Cells[0][Registro];
+
+  //Mensagem de Consulta ao Usuário
+	if (MessageBox("Você Realmente Deseja Excluir o Fabricante de UB " + nome +
+                 "?",mtConfirmation) == IDNO)
+    return;
+
+  //Execução do SQL
+  bool ret = BD.executarComandoSQL("delete from fabricante_ub where cod_fabricante_ub = "
+                        + (String) cod[Registro-1]);
+
+  //Exibição de Valores
+  if (ret)
+  {
+    //Limpeza dos Campos
+    LimparCampos();
+    ExibeCampos();
+  }
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::btnEditarClick(TObject *Sender)
+{
+  //Teste de Seleção
+  if (Registro == 0) return;
+  
+  //Set do Flag de Atualização
+  Update = true;
+
+  //Modificar Caption para Atualização
+  btnCadastrar->Caption = "&Atualizar";
+  btnCadastrar->Enabled = true;
+
+  //Habilitar Campos para Edição
+  HabilitaCampos();
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::ExibeCampos()
+{
+  //Consulta de Fabricantes de UB
+  bool ret = BD.executarConsultaSQL("select nome,cod_fabricante_ub from fabricante_ub "
+                    "order by nome;");
+  if (!ret) return;
+
+  //Número de Registros
+  int Registros = BD.getNumeroRegistros();
+
+  //Formatação do Grid
+  if (Registros == 0)
+    stgFabricante->RowCount = 2;
+  else
+    stgFabricante->RowCount = Registros + 1;
+
+  //Limpesa do Grid
+  for (int i=1;i<=stgFabricante->RowCount;i++)
+    for (int j=0;j<stgFabricante->ColCount;j++)
+			stgFabricante->Cells[j][i] = "";
+
+  //Limpa Vector
+  cod.clear();
+
+  //Exibição dos Dados no Grid
+  for (int i=0;i<Registros;i++)
+  {
+    stgFabricante->Cells[0][i+1] = BD.getValor(i,0);   //Fabricante
+    cod.push_back(BD.getValor(i,1).ToInt());            //Cod_Fabricante
+  }
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::LimparCampos()
+{
+  //Limpesa de Campos
+  edtFabricante->Text = "";
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::stgFabricanteSelectCell(
+      TObject *Sender, int ACol, int ARow, bool &CanSelect)
+{
+  //Indice do Registro no Grid
+  Registro = ARow;
+
+  //Teste de Seleção
+  if (Registro == 0) return;  
+
+  //Resert do Flag de Atualização
+  Update = false;
+
+  //Modificar Caption para Cadastro
+  btnCadastrar->Caption = "&Cadastrar";
+  btnCadastrar->Enabled = false;
+
+  //Edição de Dados
+  edtFabricante->Text = stgFabricante->Cells[0][Registro];
+
+  //Desabilitar Campos
+  DesabilitaCampos();  
+}
+//---------------------------------------------------------------------------
+void TfrmCadastroFabricanteUB::HabilitaCampos()
+{
+  edtFabricante->Enabled = true;
+  edtFabricante->Color = clWhite;
+}
+//---------------------------------------------------------------------------
+void TfrmCadastroFabricanteUB::DesabilitaCampos()
+{
+  edtFabricante->Enabled = false;
+  edtFabricante->Color = clBtnFace;
+}
+//---------------------------------------------------------------------------
+bool TfrmCadastroFabricanteUB::VerificaCampos()
+{
+  String Campos;  //Nome dos Campos não Preenchidos
+  Campos = "O(s) seguinte(s) Campo(s) não está/estão Preenchidos: ";
+  for (int i=0;i<frmCadastroFabricanteUB->ComponentCount;i++)
+    if (dynamic_cast<TEdit *>(Components[i]))
+        if (dynamic_cast<TEdit *>(Components[i])->Text.Trim() == "")
+          Campos = Campos + dynamic_cast<TEdit *>(Components[i])->Hint + ", ";
+
+  //Modificar o Final da String (, para .)
+  Campos = Campos.SubString(1,Campos.Length()-2) + ".";
+
+  //Teste com o número de Caracteres de Campos Iniciais...
+  if (Campos.Length() > 55)
+  {
+    MessageBox(Campos,mtWarning);
+    return true;
+  }
+  else
+    return false;
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::FormResize(TObject *Sender)
+{
+  //Centralizar Janela
+  this->Left = Screen->Width/2 - this->Width/2;
+  this->Top = Screen->Height/2 - this->Height/2;
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::FormClose(TObject *Sender,
+      TCloseAction &Action)
+{
+  //Desconectar Banco SISAL  
+  BD.desconectar();
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmCadastroFabricanteUB::FormKeyPress(TObject *Sender, System::WideChar &Key)
+
+{
+	WORD keyEsc = 27;
+	if (Key == keyEsc)
+		Close();
+}
+//---------------------------------------------------------------------------
+

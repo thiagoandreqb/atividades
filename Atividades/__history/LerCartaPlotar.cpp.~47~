@@ -1,0 +1,195 @@
+// ---------------------------------------------------------------------------
+
+#include <vcl.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#pragma hdrstop
+
+#include "LerCartaPlotar.h"
+// ---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma link "AdvPageControl"
+#pragma link "AdvGrid"
+#pragma link "AdvObj"
+#pragma link "BaseGrid"
+#pragma resource "*.dfm"
+TfrmLerCartaPlotar *frmLerCartaPlotar;
+
+// ---------------------------------------------------------------------------
+__fastcall TfrmLerCartaPlotar::TfrmLerCartaPlotar(TComponent* Owner)
+		: TForm(Owner) {
+}
+// ---------------------------------------------------------------------------
+
+void __fastcall TfrmLerCartaPlotar::FormCreate(TObject *Sender) {
+	Grid->Cells[0][0] = "Carga";
+	Grid->Cells[1][0] = "Posição";
+}
+// ---------------------------------------------------------------------------
+
+void __fastcall TfrmLerCartaPlotar::FormShow(TObject *Sender) {
+	if (pgcPrincipal->ActivePage == tbsBD) {
+		edtBD->SetFocus();
+	}
+	else {
+		edtDYN->SetFocus();
+	}
+}
+// ---------------------------------------------------------------------------
+
+void TfrmLerCartaPlotar::Plotar() {
+	if (plotar == false && edtBD->Text.Length() > 0 || edtDYN->Text.Length() > 0)
+	{
+		indice = 0;
+		if (pgcPrincipal->ActivePage == tbsBD) {
+			texto = edtBD->Text;
+		}
+		else {
+			texto = edtDYN->Text;
+		}
+
+		texto = StringReplace(texto, ".", ",", TReplaceFlags() << rfReplaceAll);
+
+		pos = texto.Pos("&");
+
+		resultado = texto.SubString(1, pos.ToInt() - 1);
+		texto = texto.SubString(pos.ToInt() + 1, texto.Length());
+
+		pos = texto.Pos("&");
+
+		pontos = texto.SubString(1, pos.ToInt() - 1);
+		texto = texto.SubString(pos.ToInt() + 1, texto.Length());
+
+		Label1->Caption = "Resultado: " + resultado + " | " +
+				"Quantidade de Pontos: " + pontos;
+		Grid->RowCount = pontos.ToInt() + 1;
+
+		percorrer = true;
+
+		while (percorrer) {
+			String pos = texto.Pos("&");
+
+			if (texto.Length() > 0) {
+				carga[indice] = texto.SubString(1, pos.ToInt() - 1);
+				texto = texto.SubString(pos.ToInt() + 1, texto.Length());
+
+				String pos = texto.Pos("&");
+				posicao[indice] = texto.SubString(1, pos.ToInt() - 1);
+				texto = texto.SubString(pos.ToInt() + 1, texto.Length());
+			}
+			else {
+				percorrer = false;
+			}
+			indice++;
+		}
+
+		for (i = 0; i < pontos / 2; i++) {
+			Grid->Cells[0][i + 1] = carga[i];
+			Grid->Cells[1][i + 1] = posicao[i];
+		}
+
+		for (i = 0; i < pontos / 2; i++) {
+			Series1->AddXY(carga[i].ToDouble(), posicao[i].ToDouble());
+		}
+		plotar = true;
+	}
+	else {
+		return;
+	}
+}
+// ---------------------------------------------------------------------------
+
+void __fastcall TfrmLerCartaPlotar::btnPlotarBDClick(TObject *Sender) {
+	Plotar();
+}
+// ---------------------------------------------------------------------------
+
+void __fastcall TfrmLerCartaPlotar::btnPlotarDYNClick(TObject *Sender) {
+	Plotar();
+}
+// ---------------------------------------------------------------------------
+
+void TfrmLerCartaPlotar::Limpar() {
+	if (pgcPrincipal->ActivePage == tbsBD && edtBD->Text == "" ||
+			pgcPrincipal->ActivePage == tbsDYN && edtDYN->Text == "") {
+		return;
+	}
+	else {
+		if (pgcPrincipal->ActivePage == tbsBD) {
+			edtBD->Text = "";
+		}
+		else {
+			edtDYN->Text = "";
+		}
+
+		for (i = 0; i < pontos; i++) {
+			Grid->Cells[0][i + 1] = "";
+			Grid->Cells[1][i + 1] = "";
+			Series1->Clear();
+		}
+
+		Label1->Caption = "Resultado:    | Quantidade de Pontos: ";
+
+		plotar = false;
+	}
+}
+// ---------------------------------------------------------------------------
+
+void __fastcall TfrmLerCartaPlotar::pgcPrincipalChanging(TObject *Sender,
+		bool &AllowChange) {
+	Limpar();
+}
+// ---------------------------------------------------------------------------
+
+void __fastcall TfrmLerCartaPlotar::FormClose(TObject *Sender,
+		TCloseAction &Action) {
+	Limpar();
+}
+// ---------------------------------------------------------------------------
+
+void __fastcall TfrmLerCartaPlotar::btnCarregarDYNClick(TObject *Sender) {
+	if (opdCarta->Execute()) {
+		ifstream arquivo(opdCarta->FileName.c_str());
+		if (arquivo.is_open()) {
+			std::string carta;
+			getline(arquivo, carta);
+			edtDYN->Text = carta.c_str();
+		}
+		else {
+			ShowMessage("Não foi possível carregar o arquivo de Carta");
+		}
+	}
+}
+// ---------------------------------------------------------------------------
+
+void __fastcall TfrmLerCartaPlotar::FormKeyDown(TObject *Sender, WORD &Key,
+		TShiftState Shift) {
+	if (Key == 13)
+		if (pgcPrincipal->ActivePage == tbsBD) {
+			btnPlotarBD->Click();
+		}
+		else {
+			btnPlotarDYN->Click();
+		}
+
+	if (Key == 27) {
+		Limpar();
+	}
+}
+// ---------------------------------------------------------------------------
+
+void __fastcall TfrmLerCartaPlotar::btnCarregarBDClick(TObject *Sender) {
+	TADOQuery* q = frmLerCartaPlotar->ADOQuery1;
+	q->Active = false;
+	try {
+		q->SQL->Text = "select pontos from carta_dinamometrica where(cod_poco=161)";
+		q->ExecSQL();
+		// edtBD->Text = q->;
+	}
+	catch (Exception* e) {
+		ShowMessage("Erro na consulta.");
+	}
+	q->SQL->Clear();
+}
+// ---------------------------------------------------------------------------

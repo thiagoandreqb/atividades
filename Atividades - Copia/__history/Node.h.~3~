@@ -1,0 +1,39 @@
+//---------------------------------------------------------------------------
+
+#ifndef NodeH
+#define NodeH
+//---------------------------------------------------------------------------
+#include <vcl.h>
+class Node
+{
+	private:
+		int a;
+
+	protected:
+		int c;
+
+	public:
+		int b;
+
+		Node();
+		Node(int a);
+		Node(int a, int b);
+		void calcularQuadrado();
+		String getAStr();
+		String getBStr();
+		String getCStr();
+
+		inline int getA(){ return a; }
+		inline void setA(int a){ this->a = a; }
+
+		inline int getB(){ return b; }
+		inline void setB(int b){ this->b = b; }
+
+		inline int getC(){ return c; }
+		inline void setC(int c){ this->c = c; }
+
+
+		void minhaClasse();
+};
+
+#endif

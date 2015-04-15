@@ -1,0 +1,63 @@
+//---------------------------------------------------------------------------
+
+#ifndef LerCartaPlotarH
+#define LerCartaPlotarH
+//---------------------------------------------------------------------------
+#include <System.Classes.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.StdCtrls.hpp>
+#include <Vcl.Forms.hpp>
+#include "AdvPageControl.hpp"
+#include <Vcl.ComCtrls.hpp>
+#include <Vcl.ExtCtrls.hpp>
+#include <Vcl.Grids.hpp>
+#include <VCLTee.Chart.hpp>
+#include <VclTee.TeeGDIPlus.hpp>
+#include <VCLTee.TeEngine.hpp>
+#include <VCLTee.TeeProcs.hpp>
+#include "AdvGrid.hpp"
+#include "AdvObj.hpp"
+#include "BaseGrid.hpp"
+#include <VCLTee.Series.hpp>
+#include <Vcl.Dialogs.hpp>
+#include <Vcl.ExtDlgs.hpp>
+//---------------------------------------------------------------------------
+class TfrmLerCartaPlotar : public TForm
+{
+__published:	// IDE-managed Components
+	TAdvPageControl *pgcPrincipal;
+	TAdvTabSheet *tbsBD;
+	TAdvTabSheet *tbsDYN;
+	TEdit *edtBD;
+	TButton *btnPlotar;
+	TEdit *edtDYN;
+	TButton *Button1;
+	TButton *Button2;
+	TStringGrid *Grid;
+	TLabel *Label1;
+	TChart *Chart1;
+	TLineSeries *Series1;
+	TOpenTextFileDialog *OpenTextFileDialog1;
+	void __fastcall btnPlotarClick(TObject *Sender);
+	void __fastcall FormCreate(TObject *Sender);
+	void __fastcall FormShow(TObject *Sender);
+	void __fastcall FormKeyDown(TObject *Sender, WORD &Key, TShiftState Shift);
+	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
+	void __fastcall Button2Click(TObject *Sender);
+private:	// User declarations
+public:		// User declarations
+	String carga[200];
+	String posicao[200];
+	String pontos;
+	int i;
+	int indice;
+	String texto;
+	String resultado;
+	String pos;
+	bool percorrer;
+	__fastcall TfrmLerCartaPlotar(TComponent* Owner);
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TfrmLerCartaPlotar *frmLerCartaPlotar;
+//---------------------------------------------------------------------------
+#endif

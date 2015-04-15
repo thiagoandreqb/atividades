@@ -1,0 +1,41 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+#include <tchar.h>
+//---------------------------------------------------------------------------
+USEFORM("Principal.cpp", frmPrincipal);
+USEFORM("CadastroEstacaoProducao.cpp", frmCadastroEstacao);
+USEFORM("LerCartaPlotar.cpp", frmLerCartaPlotar);
+USEFORM("Calc.cpp", Calculadora);
+//---------------------------------------------------------------------------
+int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
+{
+	try
+	{
+		Application->Initialize();
+		Application->MainFormOnTaskBar = true;
+		Application->CreateForm(__classid(TfrmPrincipal), &frmPrincipal);
+		Application->CreateForm(__classid(TCalculadora), &Calculadora);
+		Application->CreateForm(__classid(TfrmLerCartaPlotar), &frmLerCartaPlotar);
+		Application->CreateForm(__classid(TfrmCadastroEstacao), &frmCadastroEstacao);
+		Application->Run();
+	}
+	catch (Exception &exception)
+	{
+		Application->ShowException(&exception);
+	}
+	catch (...)
+	{
+		try
+		{
+			throw Exception("");
+		}
+		catch (Exception &exception)
+		{
+			Application->ShowException(&exception);
+		}
+	}
+	return 0;
+}
+//---------------------------------------------------------------------------

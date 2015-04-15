@@ -1,0 +1,291 @@
+#include <vcl.h>
+#include <windows.h>
+
+#pragma hdrstop
+#pragma argsused
+
+#include <tchar.h>
+
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+/*
+	int arrayDeInteiroUnidimensional[10];
+	srand(time(NULL));
+	int i;
+
+	for (i = 0; i < 10; i++) {
+		arrayDeInteiroUnidimensional[i] = rand();
+	}
+
+	for(i = 0 ; i <= 9; i++)
+	{
+		cout<<arrayDeInteiroUnidimensional[i]<<" ";
+	}
+
+	cout<<"FIM DO EXEMPLO DE ARRAY DE UMA DIMENSÃO"<<endl<<endl;
+
+	//<TIPO DA MATRIZ> <NOME DA MATRIZ>[<TAMANHO>][<TAMANHO>]
+	int arrayDeInteiroBidimensional[10][10];
+	int contador = 0;
+	for( int i = 0; i<10; i++)
+	{
+		for(int j = 0; j<10; j++)
+		{
+			arrayDeInteiroBidimensional[i][j] = contador;//rand();
+			contador++;
+		}
+	}
+	for( int i = 0; i<10; i++)
+	{
+		for(int j = 0; j<10; j++)
+		{
+			cout<<arrayDeInteiroBidimensional[i][j]<<" ";
+		}
+		cout<<endl;
+	}
+
+	TIPO NOME_ARRAY[TAMANHO]
+	TIPO NOME_ARRAY[TAMANHO][TAMANHO]
+	int arrayDeInteiroUn[10]
+	int arrayDeInteiroBi[10][]
+	TIPO ARRAY???
+
+
+	array[10]
+	0 1 2 3 4 5 6 7 8 9
+	1 1 1 1 1 1 1 1 1 1 <-
+
+	1 1 1 1 1 1 1 1 1 1 <-
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+	1 1 1 1 1 1 1 1 1 1
+							   */
+/*
+	cout<<"Diagonal principal";
+	cout<<endl;
+	cout<<endl;
+	int a, b;
+
+	for(a = 0; a<10; a++)
+	{
+		for(b = 0; b<10; b++)
+		{
+			if (a==b)
+			{
+			 cout<<0;
+			}
+			else
+			{
+			 cout<<1;
+			}
+		}
+		cout<<endl;
+	 }
+	cout<<endl;
+
+	cout<<"Parte vertical esquerda";
+	cout<<endl;
+	cout<<endl;
+	int c, d;
+
+	for (c = 0; c < 10; c++)
+	{
+		for (d = 0; d < 10; d++)
+		{
+			if ((c<10) && (d<5))
+			{
+				cout<<0;
+			}
+			else
+			{
+				cout<<1;
+			}
+		}
+		cout<<endl;
+	}
+	cout<<endl;
+
+	cout<<"Parte vertical direita";
+	cout<<endl;
+	cout<<endl;
+	int w, z;
+
+	for (w = 0; w < 10; w++)
+	{
+		for (z = 0; z < 10; z++)
+		{
+			if ((w<10) && (z>4))
+			{
+				cout<<0;
+			}
+			else
+			{
+				cout<<1;
+			}
+		}
+		cout<<endl;
+	}
+	cout<<endl;
+
+	cout<<"Parte horizontal superior";
+	cout<<endl;
+	cout<<endl;
+	int e, f;
+
+	for (e = 0; e < 10; e++)
+	{
+		for (f = 0; f < 10; f++)
+		{
+			if ((e<5) && (f<10))
+			{
+				cout<<0;
+			}
+			else
+			{
+				cout<<1;
+			}
+		}
+		cout<<endl;
+	}
+	cout<<endl;
+	cout<<"Parte horizontal inferior";
+	cout<<endl;
+	cout<<endl;
+	int x, y;
+
+	for (x = 0; x < 10; x++) 
+	{
+		for (y = 0; y < 10; y++) 
+		{
+			if ((x>4) & (y<10)) 
+			{
+				cout<<0;
+			}    
+			else
+			{
+				cout<<1;
+			}
+		}
+		cout<<endl;    
+	}
+	cout<<endl; 
+
+	cout<<"Diagonal principal superior pintada";
+	cout<<endl;
+	cout<<endl;
+	int g, h;
+
+	for (g = 0; g < 10; g++)
+	{
+		for (h = 0; h < 10; h++)
+		{
+			if ((h<g) | (h==g))
+			{
+				cout<<1;
+			}
+			else
+			{
+				cout<<0;
+			}
+		}
+		cout<<endl;
+	}
+	cout<<endl;
+
+	cout<<"Diagonal principal inferior pintada";
+	cout<<endl;	
+	cout<<endl;
+	int n, o;
+
+	for (n = 0; n < 10; n++) 
+	{
+		for (o = 0; o < 10; o++) 
+		{
+			if ((o<n) | (o==n)) 
+			{
+				cout<<0;
+			}
+			else
+			{	
+				cout<<1;
+			}
+		}
+		cout<<endl;			
+	}
+	cout<<endl;	
+
+	cout<<"Diagonal secundaria superior pintada";
+	cout<<endl;	
+	cout<<endl;	
+	int r, s;
+
+	for (r = 0; r < 10; r++) 
+	{
+		for (s = 0; s < 10; s++) 
+		{
+			if ((r<s) | (s==r))
+			{
+				cout<<0;
+			}
+			else
+			{ 	
+				cout<<1;
+			}
+		}
+		cout<<endl;	
+	}	
+	cout<<endl;	
+	//Diagonal secundaria inferior pintada
+
+	int t, q;
+
+	for (t = 0; t < 10; t++) 
+	{
+		for (q = 0; q < 10; q++) 
+		{
+			if ((((t<3) && (q<3)) || ((t>6) && (q<3))) || (((t>6) && (q>6)) || ((t<3) && (q>6))))
+			{
+				cout<<0;
+			}	
+			else
+			{
+				cout<<1;
+			}
+		}
+		cout<<endl;
+	}
+	cout<<endl;	
+*/
+	int x, y;
+
+	for (x = 0; x < 5; x++) 
+	{
+		for (y = 0; y < 5; y++) 
+		{
+			if ((x==0) && (y==0))
+			{
+				cout<<1;
+			}
+			else
+			{
+				cout<<0;
+			}
+		}
+			cout<<endl;
+	}
+	cout<<endl;	
+
+	return 0;
+
+}

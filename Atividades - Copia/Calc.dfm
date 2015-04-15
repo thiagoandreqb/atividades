@@ -1,0 +1,234 @@
+object Calculadora: TCalculadora
+  Left = 0
+  Top = 0
+  Caption = 'Calc'
+  ClientHeight = 225
+  ClientWidth = 161
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poScreenCenter
+  OnKeyDown = FormKeyDown
+  OnKeyPress = FormKeyPress
+  OnKeyUp = FormKeyUp
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Panel1: TPanel
+    Left = 8
+    Top = 8
+    Width = 150
+    Height = 48
+    TabOrder = 20
+  end
+  object ButtonApagar: TButton
+    Left = 7
+    Top = 67
+    Width = 33
+    Height = 25
+    Caption = '<--'
+    TabOrder = 1
+    OnClick = ButtonApagarClick
+  end
+  object ButtonLimparAtual: TButton
+    Left = 46
+    Top = 67
+    Width = 33
+    Height = 25
+    Caption = 'CE'
+    TabOrder = 2
+    OnClick = ButtonLimparAtualClick
+  end
+  object ButtonLimparTudo: TButton
+    Left = 85
+    Top = 67
+    Width = 33
+    Height = 25
+    Caption = 'C'
+    TabOrder = 3
+    OnClick = ButtonLimparTudoClick
+  end
+  object ButtonSomar: TButton
+    Left = 124
+    Top = 67
+    Width = 33
+    Height = 25
+    Caption = '+'
+    TabOrder = 4
+    OnClick = ButtonSomarClick
+  end
+  object ButtonDividir: TButton
+    Left = 124
+    Top = 129
+    Width = 33
+    Height = 25
+    Caption = '/'
+    TabOrder = 12
+    OnClick = ButtonDividirClick
+  end
+  object Button7: TButton
+    Left = 7
+    Top = 98
+    Width = 33
+    Height = 25
+    Caption = '7'
+    TabOrder = 5
+    OnClick = Button7Click
+  end
+  object Button8: TButton
+    Left = 46
+    Top = 98
+    Width = 33
+    Height = 25
+    Caption = '8'
+    TabOrder = 6
+    OnClick = Button8Click
+  end
+  object Button9: TButton
+    Left = 85
+    Top = 98
+    Width = 33
+    Height = 25
+    Caption = '9'
+    TabOrder = 7
+    OnClick = Button9Click
+  end
+  object ButtonSubtrair: TButton
+    Left = 124
+    Top = 98
+    Width = 33
+    Height = 25
+    Caption = '-'
+    TabOrder = 8
+    OnClick = ButtonSubtrairClick
+  end
+  object ButtonMultiplicar: TButton
+    Left = 124
+    Top = 160
+    Width = 33
+    Height = 25
+    Caption = '*'
+    TabOrder = 16
+    OnClick = ButtonMultiplicarClick
+  end
+  object Button4: TButton
+    Left = 7
+    Top = 129
+    Width = 33
+    Height = 25
+    Caption = '4'
+    TabOrder = 9
+    OnClick = Button4Click
+  end
+  object Button5: TButton
+    Left = 46
+    Top = 129
+    Width = 33
+    Height = 25
+    Caption = '5'
+    TabOrder = 10
+    OnClick = Button5Click
+  end
+  object Button6: TButton
+    Left = 85
+    Top = 129
+    Width = 33
+    Height = 25
+    Caption = '6'
+    TabOrder = 11
+    OnClick = Button6Click
+  end
+  object Button1: TButton
+    Left = 7
+    Top = 160
+    Width = 33
+    Height = 25
+    Caption = '1'
+    TabOrder = 13
+    OnClick = Button1Click
+  end
+  object Button2: TButton
+    Left = 46
+    Top = 160
+    Width = 33
+    Height = 25
+    Caption = '2'
+    TabOrder = 14
+    OnClick = Button2Click
+  end
+  object Button3: TButton
+    Left = 85
+    Top = 160
+    Width = 33
+    Height = 25
+    Caption = '3'
+    TabOrder = 15
+    OnClick = Button3Click
+  end
+  object Button0: TButton
+    Left = 7
+    Top = 191
+    Width = 72
+    Height = 25
+    Caption = '0'
+    TabOrder = 17
+    OnClick = Button0Click
+  end
+  object ButtonVirgula: TButton
+    Left = 85
+    Top = 191
+    Width = 33
+    Height = 25
+    Caption = ','
+    TabOrder = 18
+    OnClick = ButtonVirgulaClick
+  end
+  object ButtonResultado: TButton
+    Left = 124
+    Top = 191
+    Width = 33
+    Height = 25
+    Caption = '='
+    TabOrder = 19
+    OnClick = ButtonResultadoClick
+  end
+  object ButtonedEditValor: TButtonedEdit
+    Left = 9
+    Top = 29
+    Width = 147
+    Height = 23
+    Alignment = taRightJustify
+    BorderStyle = bsNone
+    Color = 15790320
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -21
+    Font.Name = 'Consolas'
+    Font.Style = []
+    MaxLength = 12
+    ParentFont = False
+    TabOrder = 0
+  end
+  object ButtonedEditOperador: TButtonedEdit
+    Left = 9
+    Top = 9
+    Width = 147
+    Height = 16
+    Alignment = taRightJustify
+    BorderStyle = bsNone
+    Color = 15790320
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Consolas'
+    Font.Style = []
+    MaxLength = 12
+    ParentFont = False
+    TabOrder = 21
+  end
+end

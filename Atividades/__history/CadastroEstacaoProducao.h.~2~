@@ -1,0 +1,88 @@
+//---------------------------------------------------------------------------
+
+#ifndef CadastroEstacaoProducaoH
+#define CadastroEstacaoProducaoH
+//---------------------------------------------------------------------------
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <StdCtrls.hpp>
+#include <Forms.hpp>
+#include <Grids.hpp>
+#include <Mask.hpp>
+#include <Db.hpp>
+#include <DBCtrls.hpp>
+#include <DBGrids.hpp>
+#include "AdvGrid.hpp"
+#include "AdvObj.hpp"
+#include "BaseGrid.hpp"
+#include <vector>
+//---------------------------------------------------------------------------
+class TfrmCadastroEstacao : public TForm
+{
+__published:	// IDE-managed Components
+  TGroupBox *gpbEstacaoProducao;
+  TButton *btnCadastrar;
+  TButton *btnCancelar;
+  TButton *btnDetalhes;
+  TButton *btnExcluir;
+  TLabel *lblTexto;
+  TLabel *lblTexto1;
+  TButton *btnEditar;
+  TLabel *lblCampoProducao;
+  TComboBox *cmbCampoProducao;
+  TLabel *lblTelefone;
+  TMaskEdit *edtTelefone;
+	TAdvStringGrid *stgEstacaoProducao;
+  void __fastcall btnDetalhesClick(TObject *Sender);
+  void __fastcall btnCancelarClick(TObject *Sender);
+  void __fastcall btnCadastrarClick(TObject *Sender);
+  void __fastcall FormShow(TObject *Sender);
+  void __fastcall btnEditarClick(TObject *Sender);
+  void __fastcall stgEstacaoProducaoSelectCell(TObject *Sender, int ACol,
+          int ARow, bool &CanSelect);
+  void __fastcall btnExcluirClick(TObject *Sender);
+  void __fastcall FormResize(TObject *Sender);
+  void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
+	void __fastcall FormKeyPress(TObject *Sender, System::WideChar &Key);
+private:	// User declarations
+
+  //Posição do Registro no Grid
+  int Registro;
+
+  //Flag para Indentificar uma Operação de Atualização
+  bool Update;
+
+  //Flag para Exibição de Detalhes (Grid)
+  bool Detalhes;
+
+  //Container para Chaves Primária
+  std::vector<int>cod;  //Código da Estação
+
+  //Container para Chaves Estrangeiras
+  std::vector<int>cod_campo; //Código do Campo de Produção - Chave Estrangeira
+
+  //Container para Chaves Estrangeiras Auxiliar
+  std::vector<int>cod_aux;   //Código do Campo de Produção - Chave Estrangeira
+
+public:		// User declarations
+  __fastcall TfrmCadastroEstacao(TComponent* Owner);
+
+  //Exibição dos Registros no Grid após Consulta
+  void __fastcall TfrmCadastroEstacao::ExibeCampos();
+
+  //Limpeza dos Campos
+  void __fastcall TfrmCadastroEstacao::LimparCampos();
+
+  //Verifica Preenchimento de Campos
+  bool VerificaCampos();
+
+  //Habilitação de campos
+  void HabilitaCampos();
+
+  //Desabilitação de campos
+  void DesabilitaCampos();
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TfrmCadastroEstacao *frmCadastroEstacao;
+//---------------------------------------------------------------------------
+#endif

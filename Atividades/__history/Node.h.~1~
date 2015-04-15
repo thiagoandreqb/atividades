@@ -1,0 +1,19 @@
+//---------------------------------------------------------------------------
+
+#ifndef NodeH
+#define NodeH
+//---------------------------------------------------------------------------
+
+class Node
+{
+	private:
+		int a;
+
+	protected:
+		int c;
+
+	public:
+		int b;
+		void calcularQuadrado(int a);
+};
+#endif

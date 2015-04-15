@@ -1,0 +1,361 @@
+/*
+ * Esta janela realiza o cadastro, exlusão e alteração de informações
+ pertinentes a Estações de Produção.
+ */
+
+// ---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+
+#include "CadastroEstacaoProducao.h"
+#include "Principal.h"
+// ---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma link "AdvGrid"
+#pragma link "AdvObj"
+#pragma link "BaseGrid"
+#pragma resource "*.dfm"
+TfrmCadastroEstacao *frmCadastroEstacao;
+
+// ---------------------------------------------------------------------------
+__fastcall TfrmCadastroEstacao::TfrmCadastroEstacao(TComponent* Owner)
+		: TForm(Owner) {
+	// Inicialização do Flag de Expansão da Janela
+	Detalhes = false;
+
+	// Inicialização do Flag de Atualização
+	Update = false;
+
+	// Inicialização da Variável de Registro
+	Registro = 1;
+
+	// Formatação do Grid
+	stgEstacaoProducao->ColWidths[0] = 194;
+	stgEstacaoProducao->Cells[0][0] = "Campo de produção";
+	stgEstacaoProducao->ColWidths[1] = 146;
+	stgEstacaoProducao->Cells[1][0] = "Telefone";
+}
+
+// ---------------------------------------------------------------------------
+void __fastcall TfrmCadastroEstacao::btnDetalhesClick(TObject *Sender) {
+	// Modifica Exibição da Janela
+	Detalhes = !Detalhes;
+
+	if (Detalhes) {
+		frmCadastroEstacao->Height = 433;
+		btnEditar->Visible = true;
+		btnExcluir->Visible = true;
+		lblTexto->Visible = true;
+		lblTexto1->Visible = true;
+		stgEstacaoProducao->Visible = true;
+	}
+	else {
+		frmCadastroEstacao->Height = 160;
+		btnEditar->Visible = false;
+		btnExcluir->Visible = false;
+		lblTexto->Visible = false;
+		lblTexto1->Visible = false;
+		stgEstacaoProducao->Visible = false;
+	}
+}
+
+// ---------------------------------------------------------------------------
+void __fastcall TfrmCadastroEstacao::btnCancelarClick(TObject *Sender) {
+	// Resert do Flag de Atualização
+	Update = false;
+
+	// Limpar Campos
+	LimparCampos();
+
+	// Modificar Caption para Cadastro
+	btnCadastrar->Caption = "&Cadastrar";
+	btnCadastrar->Enabled = true;
+
+	// Habilitar Campos para Edição
+	HabilitaCampos();
+}
+
+// ---------------------------------------------------------------------------
+void __fastcall TfrmCadastroEstacao::btnCadastrarClick(TObject *Sender) {
+	String nomeEstacao, codigoCampo, telefone;
+	if (VerificaCampos())
+		return;
+
+	codigoCampo = (String) cod_aux[cmbCampoProducao->ItemIndex];
+	telefone = edtTelefone->Text;
+	telefone = StringReplace(telefone, "(", "", TReplaceFlags() << rfReplaceAll);
+	telefone = StringReplace(telefone, ")", "", TReplaceFlags() << rfReplaceAll);
+	telefone = StringReplace(telefone, "-", "", TReplaceFlags() << rfReplaceAll);
+
+	/** Iniciar transação */
+//	bool ret = BD.executarComandoSQL("begin;");
+
+	if (Update){
+//			 Execução do SQL de Update
+				frmPrincipal->ADOQuery1->SQL->Clear();
+				frmPrincipal->ADOQuery1->SQL->Add("update estacao set cod_campo =" +
+				codigoCampo + ", telefone = " + telefone + " where cod_estacao =" +
+				(String) cod[Registro - 1]);
+				frmPrincipal->ADOQuery1->ExecSQL();
+	}
+	else{
+				frmPrincipal->ADOQuery1->SQL->Clear();
+				frmPrincipal->ADOQuery1->SQL->Add	("insert into estacao (cod_campo,telefone) values ('," +
+				codigoCampo + "," + telefone + ")");
+				frmPrincipal->ADOQuery1->ExecSQL();
+	}
+//
+//	if (ret)
+//		BD.executarComandoSQL("commit;");
+//	else
+//		BD.executarComandoSQL("rollback;");
+
+	if (Update){
+//		if (ret)
+			ShowMessage("Estação de produção atualizada com sucesso.");
+	}
+//
+	if (!Update){
+//		if (ret)
+			ShowMessage("Estação de produção cadastrada com sucesso.");
+	}
+
+	// Exibição de Valores
+//	if (ret)
+		ExibeCampos();
+	if (Update) {
+		edtTelefone->Text = "";
+	}
+	if (!Update)
+		LimparCampos();
+}
+
+// ---------------------------------------------------------------------------
+void __fastcall TfrmCadastroEstacao::FormShow(TObject *Sender) {
+	// Centralizar Janela
+	this->Left = Screen->Width / 2-this->Width / 2;
+	this->Top = Screen->Height / 2-this->Height / 2;
+
+	// Exibição de Campos
+	if (!Update)
+		ExibeCampos();
+
+	// Habilitar Campos para Edição
+	if (Update)
+		HabilitaCampos();
+}
+
+// ---------------------------------------------------------------------------
+void __fastcall TfrmCadastroEstacao::ExibeCampos() {
+	// Consulta de Estações de Produção
+			frmPrincipal->ADOQuery1->SQL->Clear();
+			frmPrincipal->ADOQuery1->SQL->Add("select a.nome, b.nome, b.cod_estacao, b.cod_campo, b.telefone from	campo_producao as a, estacao as b where a.cod_campo = b.cod_campo order by b.nome;");
+			frmPrincipal->ADOQuery1->Open();
+
+		return;
+//
+//	 Número de Registros e Colunas
+//	int Registros = BD.getNumeroRegistros();
+//
+//	 Formatação do Grid
+//	if (Registros == 0)
+//		stgEstacaoProducao->RowCount = 2;
+//	else
+//		stgEstacaoProducao->RowCount = Registros + 1;
+
+	// Limpesa do Grid
+	for (int i = 1; i <= stgEstacaoProducao->RowCount; i++)
+		for (int j = 0; j < stgEstacaoProducao->ColCount; j++)
+			stgEstacaoProducao->Cells[j][i] = "";
+
+	// Exibição dos Dados no Grid
+//	for (int i = 0; i < Registros; i++) {
+//		stgEstacaoProducao->Cells[0][i + 1] = BD.getValor(i, 0); // Estação
+//		stgEstacaoProducao->Cells[1][i + 1] = BD.getValor(i, 4); // Telefone
+//	}
+
+	// Limpa Vector
+	cod.clear();
+	cod_campo.clear();
+	// Chave Primária dos Registros
+//	for (int i = 0; i < Registros; i++) {
+//		cod.push_back(BD.getValor(i, 2).ToInt());
+//		cod_campo.push_back(BD.getValor(i, 3).ToInt());
+//	}
+
+	// Consulta de Campo de Produção
+//	if (BD.executarConsultaSQL
+//			("select nome,cod_campo from campo_producao order by nome;")) {
+//		cod_aux.clear();
+//		cmbCampoProducao->Items->Clear();
+//		Registros = BD.getNumeroRegistros();
+//		for (int i = 0; i < Registros; i++) {
+//			cmbCampoProducao->Items->Add(BD.getValor(i, 0));
+//			cod_aux.push_back(BD.getValor(i, 1).ToInt());
+//		}
+//	}
+}
+
+// ---------------------------------------------------------------------------
+void __fastcall TfrmCadastroEstacao::LimparCampos() {
+	// Limpesa de Campos
+	cmbCampoProducao->ItemIndex = -1;
+	edtTelefone->Text = "";
+}
+
+// ---------------------------------------------------------------------------
+void __fastcall TfrmCadastroEstacao::btnEditarClick(TObject *Sender) {
+	// Teste de Seleção
+	if (Registro == 0)
+		return;
+
+	// Set do Flag de Atualização
+	Update = true;
+
+	// Modificar Caprion para Atualização
+	btnCadastrar->Caption = "&Atualizar";
+	btnCadastrar->Enabled = true;
+
+	// Habilitar Campos para Edição
+	HabilitaCampos();
+}
+
+// ---------------------------------------------------------------------------
+void __fastcall TfrmCadastroEstacao::stgEstacaoProducaoSelectCell
+		(TObject *Sender, int ACol, int ARow, bool &CanSelect) {
+	// Indice do Registro no Grid
+	Registro = ARow;
+
+	// Teste de Seleção
+	if (Registro == 0)
+		return;
+
+	// Resert do Flag de Atualização
+	Update = false;
+
+	// Modificar Caption para Cadastro
+	btnCadastrar->Caption = "&Cadastrar";
+	btnCadastrar->Enabled = false;
+
+	// Edição de Dados
+	String telefoneFormatado = stgEstacaoProducao->Cells[1][Registro];
+	telefoneFormatado.Insert("(", 1);
+	telefoneFormatado.Insert(")", 4);
+	telefoneFormatado.Insert("-", 9);
+
+	edtTelefone->Text = telefoneFormatado;
+	for (unsigned i = 0; i < cod_aux.size(); i++)
+		if (cod_campo[Registro - 1] == cod_aux[i]) {
+			cmbCampoProducao->ItemIndex = i;
+			break;
+		}
+
+	// Desabilitar Campos
+	DesabilitaCampos();
+}
+
+// ---------------------------------------------------------------------------
+void TfrmCadastroEstacao::HabilitaCampos() {
+	cmbCampoProducao->Enabled = true;
+	cmbCampoProducao->Color = clWhite;
+	edtTelefone->Enabled = true;
+	edtTelefone->Color = clWhite;
+}
+
+// ---------------------------------------------------------------------------
+void TfrmCadastroEstacao::DesabilitaCampos() {
+	cmbCampoProducao->Enabled = false;
+	cmbCampoProducao->Color = clBtnFace;
+	edtTelefone->Enabled = false;
+	edtTelefone->Color = clBtnFace;
+}
+
+// ---------------------------------------------------------------------------
+void __fastcall TfrmCadastroEstacao::btnExcluirClick(TObject *Sender) {
+	bool ret;
+	// Verifica se o Usuário não selecionou um registro válido
+	if (Registro == 0)
+		return;
+
+	// Nome do Campo de Produção
+	const String nome = stgEstacaoProducao->Cells[0][Registro];
+
+	// Mensagem de Consulta ao Usuário
+//	if (MessageBox("Você Realmente Deseja Excluir a Estação de Produção " + nome +
+//			"?", mtConfirmation) == IDNO)
+//		return;
+//
+//	 Execução do SQL
+//	if (BD.executarConsultaSQL("select count(*) from poco where cod_campo = " +
+//			(String) cod[Registro - 1] + ";") <= 0) {
+//		ret = BD.executarComandoSQL("delete from estacao where cod_estacao = " +
+//				(String) cod[Registro - 1]);
+//	}
+//	else {
+//		MessageDLG("Não foi possível deletar a estação " + nome +
+//				" do SISAL. Devido por ainda existir poços vinculados.", mtError,
+//				TMsgDlgButtons() << mbOK, 0);
+//		return;
+//	}
+
+	// Exibição de Valores
+	if (ret) {
+		// Limpeza dos Campos
+		LimparCampos();
+		ExibeCampos();
+	}
+}
+
+// ---------------------------------------------------------------------------
+bool TfrmCadastroEstacao::VerificaCampos() {
+	// Nome dos Campos não Preenchidos
+	String Campos = "O(s) seguinte(s) Campo(s) não está/estão Preenchidos: ";
+	for (int i = 0; i < frmCadastroEstacao->ComponentCount; i++) {
+		if (dynamic_cast<TEdit*>(Components[i]))
+			if (dynamic_cast<TEdit*>(Components[i])->Text.Trim() == "")
+				Campos = Campos +dynamic_cast<TEdit*>(Components[i])->Hint + ", ";
+		if (dynamic_cast<TComboBox*>(Components[i]))
+			if (dynamic_cast<TComboBox*>(Components[i])->ItemIndex < 0)
+				Campos = Campos +dynamic_cast<TComboBox*>(Components[i])->Hint + ", ";
+	}
+
+	if (edtTelefone->Text == "(  )    -    ")
+		Campos = Campos + edtTelefone->Hint;
+
+	// Modificar o Final da String (, para .)
+	Campos = Campos.SubString(1, Campos.Length()) + ".";
+
+	// Teste com o número de Caracteres de Campos Iniciais...
+//	if (Campos.Length() > 55) {
+//		MessageBox(Campos, mtWarning);
+//		return true;
+//	}
+//	else
+//		return false;
+}
+
+// ---------------------------------------------------------------------------
+void __fastcall TfrmCadastroEstacao::FormResize(TObject *Sender) {
+	// Centralizar Janela
+	this->Left = Screen->Width / 2-this->Width / 2;
+	this->Top = Screen->Height / 2-this->Height / 2;
+}
+
+// ---------------------------------------------------------------------------
+void __fastcall TfrmCadastroEstacao::FormClose(TObject *Sender,
+		TCloseAction &Action) {
+	// Desconectar Banco SISAL
+//	BD.desconectar();
+}
+// ---------------------------------------------------------------------------
+
+void __fastcall TfrmCadastroEstacao::FormKeyPress(TObject *Sender,
+		System::WideChar &Key)
+
+{
+	WORD keyEsc = 27;
+	if (Key == keyEsc)
+		Close();
+}
+// ---------------------------------------------------------------------------
