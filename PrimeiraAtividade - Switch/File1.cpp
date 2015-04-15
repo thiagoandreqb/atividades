@@ -13,8 +13,7 @@
 
 using namespace std;
 
- int _tmain(int argc, _TCHAR* argv[])
-{
+ int _tmain(int argc, _TCHAR* argv[]){
 	const int CANDIDATO_A=1,CANDIDATO_B=2,CANDIDATO_C=3, CANDIDATO_D=0, CANDIDATO_E=9;
 	int VARIAVEL_ALTERNATIVA;
 	int variavel=random(4);
